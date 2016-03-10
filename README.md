@@ -1,2 +1,3 @@
-# this readme will be updated at some point, I promise.
-#test
+# Attune
+
+# Welcome to Attune a video sycning library 

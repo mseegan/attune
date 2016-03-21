@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<title>Attune Lobby</title>
+	<style>
+		title {
+			display: none;
+		} 
+		.lobby {
+			margin: 10px;
+			padding: 10px;
+			background-color: lightgrey;
+		}
+		.lobbyTable {
+			margin: 5px;
+			padding: 10px;
+		}
+		.lobbyTable td {
+			margin: 5px;
+			padding: 10px;
+		}
+	</style>
+	<script src="http://code.jquery.com/jquery-1.9.0rc1.js"></script>
+	<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+</head>
+<body onload="updateTable()">
+	<div class="lobby">
+		<h1>Attune Lobby</h1>
+	</div>
+	<div class="lobby">
+		<button>Create Room</button>
+		<button>Reload</button>
+		<form style="float: right;">
+			<input type="text" name="query"></input>
+			<input type="submit" value="Search"/>
+		</form>
+	</div>
+	<div class="lobby">
+		<table id="roomsTable" class="lobbyTable" style="width:100%">
+			<tr>
+				<th>Room Name</th>
+				<th>Owner</th>
+			</tr>
+		</table>
+	</div>
+	
+	<script>
+		function updateTable(tableEl) {
+			$.ajax({
+				url: "/lobby/rooms",
+				success: function(result) {
+					var roomsTable = document.getElementById("roomsTable");
+					for (var r=0; r<roomsTable.rows.length-1; r++) {
+						roomsTable.deleteRow(1);
+					}
+					var rooms = result['rooms'];
+					for (var r=0; r<rooms.length; r++) {
+						addRow(roomsTable, rooms[r]);
+					}
+				}
+			});
+		}
+		/*
+			addRow
+			tableEl - dom table element
+			row - dictionary of all the elements in a row (name, owner, date, uniq)
+		*/
+		function addRow(tableEl, row) {
+			var rowEl = tableEl.insertRow();
+			rowEl.style = "outline: thin solid black;cursor: pointer;"
+			var nameCell = rowEl.insertCell(0);
+			var nameOwner = rowEl.insertCell(1);
+			nameCell.innerHTML = row.name;
+			nameOwner.innerHTML = row.owner;
+			$(rowEl).on('click', function() {
+				alert('you clicked ' + row['uniq']);
+			});
+		}
+	</script>
+	
+	<!--
+	<script>
+		var socket = io.connect('http://localhost');
+		socket.on('news', function (data) {
+			console.log(data);
+			socket.emit('my other event', { my: 'data' });
+		});
+	</script>
+	-->
+</body>
+</html>

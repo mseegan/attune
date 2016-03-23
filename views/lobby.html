@@ -23,16 +23,25 @@
 	<script src="http://code.jquery.com/jquery-1.9.0rc1.js"></script>
 	<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 </head>
-<body onload="updateTable()">
+<body onload="loadPage()">
 	<div class="lobby">
 		<h1>Attune Lobby</h1>
 	</div>
 	<div class="lobby">
-		<button>Create Room</button>
-		<button>Reload</button>
+		<button  onclick="createRoomFormSetVisibilty('block')">Create Room</button>
+		<button onclick="updateTable()">Reload</button>
 		<form style="float: right;">
 			<input type="text" name="query"></input>
 			<input type="submit" value="Search"/>
+			
+		</form>
+	</div>
+	<div id="createRoomForm" class="lobby">
+		<form>
+			Room Name:<br>
+			<input id="roomName" type="text" name="roomName"><br>
+			<input type="button" value="Create" onclick="createRoom()">
+			<input type="button" value="Cancel" onclick="createRoomFormSetVisibilty('none')"/>
 		</form>
 	</div>
 	<div class="lobby">
@@ -43,14 +52,19 @@
 			</tr>
 		</table>
 	</div>
-	
 	<script>
-		function updateTable(tableEl) {
+		function loadPage() {
+			createRoomFormSetVisibilty('none');
+			updateTable();
+		}
+		
+		function updateTable() {
 			$.ajax({
-				url: "/lobby/rooms",
+				url: "/room",
 				success: function(result) {
 					var roomsTable = document.getElementById("roomsTable");
-					for (var r=0; r<roomsTable.rows.length-1; r++) {
+					var tableLength = roomsTable.rows.length-1;
+					for (var r=0; r<tableLength; r++) {
 						roomsTable.deleteRow(1);
 					}
 					var rooms = result['rooms'];
@@ -73,8 +87,34 @@
 			nameCell.innerHTML = row.name;
 			nameOwner.innerHTML = row.owner;
 			$(rowEl).on('click', function() {
-				alert('you clicked ' + row['uniq']);
+				//alert('you clicked ' + row['uniq']);
+				window.open('/view/room/'+row.uniq, '_blank');
+				
 			});
+		}
+		function createRoomFormSetVisibilty(visible) {
+			$('#createRoomForm').css("display", visible);
+		};
+		function createRoom() {
+			var newRoom = $('#roomName').val();
+			var data = {
+				name: newRoom,
+				owner: 'guest'
+			};
+			$('#roomName').val('');
+			var data = JSON.stringify(data);
+			$.ajax({
+				url: "/room",
+				type: "POST",
+				contentType: 'application/json',
+				dataType: 'json',
+				data: data,
+				success: function() {
+					
+				},
+			});
+			createRoomFormSetVisibilty('none');
+			updateTable();
 		}
 	</script>
 	

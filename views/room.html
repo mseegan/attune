@@ -1,10 +1,76 @@
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
-	<title>Room</title>
+	<title>Attune Room</title>
+	<style>
+		title {
+			display: none;
+		}
+		.room {
+			margin: 10px;
+			padding: 10px;
+			background-color: lightgrey;
+		}
+		.chat {
+			margin: 10px;
+			padding: 10px;
+			background-color: lightgrey;			
+		}
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { font: 13px Helvetica, Arial; }
+		form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+		form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+		form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+		#messages { list-style-type: none; margin: 0; padding: 0; }
+		#messages li { padding: 5px 10px; }
+		#messages li:nth-child(odd) { background: #eee; }
+	</style>
+	<script src="http://code.jquery.com/jquery-1.9.0rc1.js"></script>
+	<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 </head>
-<body>
-	<div>
-		<h1>Welcome to room</h1>
-	</div>	
+<body onload="setupRoom()">
+	<div class="room">
+		<h1 id="title">Room: </h1>
+	</div>
+	<ul id="messages"></ul>
+	<form action="">
+		<input id="m" autocomplete="off" /><button>Send</button>
+	</form>
+		
+	
+	<script>
+		var socket = io();
+		$('form').submit(function(){
+			socket.emit('chat message', $('#m').val());
+		$('#m').val('');
+			return false;
+		});
+		socket.on('chat message', function(msg){
+			$('#messages').append($('<li>').text(msg));
+		});
+		function setupRoom() {
+			var url = document.documentURI;
+			var uniq = "";
+			var matches = url.match(/\/room\/([^\/]+)/);
+			if (matches) {
+				uniq = matches[1];    // "whatever"
+				socket.emit('addUser', {
+					user: 'guest',
+					room_id: uniq
+				});
+				$.ajax({
+					url:'/room/'+uniq,
+					success: function(result) {
+						setRoom(result);
+					}
+				})
+			} else {
+				// no match for the category
+			}
+		};
+		
+		function setRoom(room) {
+			$('#title').text('Room: '+room.name);
+		};
+	</script>
 </body>

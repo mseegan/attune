@@ -1,38 +1,53 @@
 var ONEDAY = 86400000;
 
 var express = require('express');
-//var socket_io = require('socket.io');
+var bodyParser = require('body-parser');
+var multer = require('multer'); // v1.0.5
+var upload = multer(); // for parsing multipart/form-data
+
+var FlakeIdGen = require('flake-idgen')
+    , intformat = require('biguint-format')
+    , generator = new FlakeIdGen;
 
 
 var app = express();
-//var io = socket_io(app);
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
+
+//middleware
 app.use('/public', express.static(__dirname + '/public', { maxAge: ONEDAY }));
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-app.listen(5000, function () {
-  console.log('Example app listening on port 5000!');
-});
 
 
 //geto database
 var rooms = [
-	{name:'My Room', owner: 'guest', date: 'some date', uniq:'kdshfalkf'}, 
-	{name:'Your Room', owner: 'guest', date: 'some date', uniq:'asdjhfkasdj'}, 
+	{name:'My Room', owner: 'guest', date: 'some date', uniq:'kdshfalkf', tags:''}, 
+	{name:'Your Room', owner: 'guest', date: 'some date', uniq:'asdjhfkasdj', tags:''}, 
 ];
 
-//Endpoints
+var users = {};
+
+//Routes
 app.get('/', function (req, res) {
 	console.log('[log] : GET /');
 	res.sendFile(__dirname + '/views/index.html');
 });
 
-
-app.get('/lobby', function (req, res) {
+app.get('/view/lobby', function (req, res) {
 	console.log('[log] : GET /lobby');
 	res.sendFile(__dirname + '/views/lobby.html');
 });
 
-app.get('/lobby/rooms', function(req, res) {
+app.get('/view/room/:uniq', function (req, res) {
+	var uniq = req.params.uniq;
+	console.log('[log] : GET /view/room/'+uniq);
+	res.sendFile(__dirname + '/views/room.html');
+});
+
+app.get('/room', function(req, res) {
 	console.log('[log] : GET /lobby/rooms');
 	var response = [];
 	for (var r=0; r<rooms.length; r++) {
@@ -41,27 +56,61 @@ app.get('/lobby/rooms', function(req, res) {
 	res.json({rooms:response});
 });
 
-app.post('lobby/rooms', function(req, res){
-	console.log('[log] : POST /lobby/rooms');
-})
-
-app.get('/room/:name', function (req, res) {
-	console.log('[log] : GET /lobby'+name);
-	res.sendFile(__dirname + '/views/room.html');
-});
-
-/*
-//Sockets
-io.on('connection', function (socket) {
-	//socket.emit('change', { hello: 'world' });
-	socket.on('my other event', function (data) {
-		console.log(data);
+// creates a new room uniquely named room
+// may remove unique ids since names are unique however some names may not work in urls
+app.post('/room', function(req, res){
+	console.log('[log] : POST /room');
+	console.log('[log] : Body: '+ req.body.name);
+	var uniq = intformat(generator.next(), 'dec');
+	rooms.push({
+		name: req.body.name,
+		owner: 'guest',
+		date: 'some date',
+		uniq: uniq, 
+		tags:'',
 	});
-	socket.on('disconnected', function() {
-		console.log('User left');
-	})
 });
-*/
 
+app.get('/room/:uniq', function(req, res){
+	var uniq = req.params.uniq;
+	console.log('[log] : GET /room/'+uniq);
+	//search for room
+	var room = null;
+	for (var r=0; r<rooms.length; r++) {
+		if (uniq == rooms[r].uniq) {
+			room = rooms[r];
+			break;
+		}
+	}
+	if (room) {
+		res.json(rooms[r]);
+	} else {
+		res.json({ error: 'Not found' });
+	}
+});
+
+
+//Sockets
+io.on('connection', function(socket){
+	console.log('a user connected');
+	socket.on('addUser', function(data){ //adds user to room
+		console.log('Added user to room: '+data.room_id);
+		socket.join(data.room_id);
+		socket.room_id = data.room_id;
+		socket.user = data.user;
+	});
+	socket.on('disconnect', function(){
+		console.log('User disconnected');
+	});
+	socket.on('chat message', function(msg){
+		console.log('Room: '+socket.room_id+' message: ' + msg);
+		io.to(socket.room_id).emit('chat message', msg);
+	});
+});
+
+
+http.listen(5000, function () {
+  console.log('Attune listening on port 5000!');
+});
 
 

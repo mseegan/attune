@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 
 
 
-//geto database
+//getto database
 var rooms = [
 	{name:'My Room', owner: 'guest', date: 'some date', uniq:'kdshfalkf', tags:''}, 
 	{name:'Your Room', owner: 'guest', date: 'some date', uniq:'asdjhfkasdj', tags:''}, 
@@ -31,22 +31,39 @@ var rooms = [
 var users = {};
 
 //Routes
+
+//index
 app.get('/', function (req, res) {
 	console.log('[log] : GET /');
 	res.sendFile(__dirname + '/views/index.html');
 });
 
+
+//
 app.get('/view/lobby', function (req, res) {
 	console.log('[log] : GET /lobby');
 	res.sendFile(__dirname + '/views/lobby.html');
 });
-
+/*
+*	GET: /view/room/**uniq**
+*
+*	Servers the view for a room with the unique id
+*
+*	return room.html
+*/
 app.get('/view/room/:uniq', function (req, res) {
 	var uniq = req.params.uniq;
 	console.log('[log] : GET /view/room/'+uniq);
 	res.sendFile(__dirname + '/views/room.html');
 });
 
+/*
+*	GET: /room
+*
+*	Lists all the rooms in json format
+*
+*	return [{name:'',owner:''},....]
+*/
 app.get('/room', function(req, res) {
 	console.log('[log] : GET /lobby/rooms');
 	var response = [];
@@ -58,17 +75,31 @@ app.get('/room', function(req, res) {
 
 // creates a new room uniquely named room
 // may remove unique ids since names are unique however some names may not work in urls
+/*
+*	POST: /room
+*
+*	Body: {
+*		name:'',
+*		owner: '',
+*	}
+*
+*	Creates a new room with the info provided and returns information on the room in json format
+*
+*	return {name:'',owner:''}
+*/
 app.post('/room', function(req, res){
 	console.log('[log] : POST /room');
 	console.log('[log] : Body: '+ req.body.name);
 	var uniq = intformat(generator.next(), 'dec');
-	rooms.push({
+	var room = {
 		name: req.body.name,
 		owner: 'guest',
 		date: 'some date',
 		uniq: uniq, 
 		tags:'',
-	});
+	}
+	rooms.push(room);
+	res.json(room);
 });
 
 app.get('/room/:uniq', function(req, res){
@@ -101,6 +132,10 @@ io.on('connection', function(socket){
 	});
 	socket.on('disconnect', function(){
 		console.log('User disconnected');
+	});
+	socket.on('set player state', function(state) {
+		console.log('Room: '+socket.room_id+' set player state: ' + state);
+		io.to(socket.room_id).emit('set player state', state);
 	});
 	socket.on('chat message', function(msg){
 		console.log('Room: '+socket.room_id+' message: ' + msg);

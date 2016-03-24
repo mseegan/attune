@@ -14,6 +14,19 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+var mongoose = require('mongoose');
+
+var channelSchema = new mongoose.Schema({
+	name: String,
+	owner: String,
+	date: Date,
+	uniq: String,
+	tags: String,
+});
+mongoose.model('Channel', channelSchema); 
+mongoose.connect('mongodb://localhost:27017/attune');
+
+var Channel = mongoose.model('Channel');
 
 //middleware
 app.use('/public', express.static(__dirname + '/public', { maxAge: ONEDAY }));
@@ -21,13 +34,7 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 
-
 //getto database
-var rooms = [
-	{name:'My Room', owner: 'guest', date: 'some date', uniq:'kdshfalkf', tags:''}, 
-	{name:'Your Room', owner: 'guest', date: 'some date', uniq:'asdjhfkasdj', tags:''}, 
-];
-
 var users = {};
 
 //Routes
@@ -40,21 +47,39 @@ app.get('/', function (req, res) {
 
 
 //
-app.get('/view/lobby', function (req, res) {
+app.get('/lobby', function (req, res) {
 	console.log('[log] : GET /lobby');
 	res.sendFile(__dirname + '/views/lobby.html');
 });
 /*
-*	GET: /view/room/**uniq**
+*	GET: /room/**uniq**
 *
 *	Servers the view for a room with the unique id
 *
 *	return room.html
 */
-app.get('/view/room/:uniq', function (req, res) {
-	var uniq = req.params.uniq;
-	console.log('[log] : GET /view/room/'+uniq);
-	res.sendFile(__dirname + '/views/room.html');
+app.get('/room/:uniq', function (req, res) {
+	res.format({
+		html: function() {
+			var uniq = req.params.uniq;
+			console.log('[log] : GET /view/room/'+uniq);
+			res.sendFile(__dirname + '/views/room.html');
+		},
+		json: function() {
+			var uniq = req.params.uniq;
+			console.log('[log] : GET /room/'+uniq);
+			//search for room
+			Channel.findOne({uniq:uniq}, function(err, channel) {
+				//res.json({'room':channels});  
+				if (channel) {
+					res.json(channel);
+				} else {
+					res.json({ error: 'Not found' });
+				}
+				});
+
+		}
+	});
 });
 
 /*
@@ -65,12 +90,10 @@ app.get('/view/room/:uniq', function (req, res) {
 *	return [{name:'',owner:''},....]
 */
 app.get('/room', function(req, res) {
-	console.log('[log] : GET /lobby/rooms');
-	var response = [];
-	for (var r=0; r<rooms.length; r++) {
-			response.push(rooms[r]);
-	}
-	res.json({rooms:response});
+	console.log('[log] : GET /room');
+	Channel.find({}, function(err, channels) {
+		res.json({'rooms':channels});  
+	});
 });
 
 // creates a new room uniquely named room
@@ -91,33 +114,22 @@ app.post('/room', function(req, res){
 	console.log('[log] : POST /room');
 	console.log('[log] : Body: '+ req.body.name);
 	var uniq = intformat(generator.next(), 'dec');
-	var room = {
-		name: req.body.name,
-		owner: 'guest',
-		date: 'some date',
-		uniq: uniq, 
-		tags:'',
+	var channel = {
+		name : req.body.name,
+		owner : 'guest',
+		date : Date.now(),
+		uniq : uniq,
+		tags : ''
 	}
-	rooms.push(room);
-	res.json(room);
-});
-
-app.get('/room/:uniq', function(req, res){
-	var uniq = req.params.uniq;
-	console.log('[log] : GET /room/'+uniq);
-	//search for room
-	var room = null;
-	for (var r=0; r<rooms.length; r++) {
-		if (uniq == rooms[r].uniq) {
-			room = rooms[r];
-			break;
+	var c = new Channel(channel);
+	c.save(function(err) {
+		if (err) {
+			console.log(err);
+		} else {
+			res.json(channel);
 		}
-	}
-	if (room) {
-		res.json(rooms[r]);
-	} else {
-		res.json({ error: 'Not found' });
-	}
+		
+	})
 });
 
 

@@ -64,6 +64,8 @@
 				});
 				$.ajax({
 					url:'/room/'+uniq,
+					contentType: 'application/json',
+					dataType: 'json',
 					success: function(result) {
 						setRoom(result);
 					}

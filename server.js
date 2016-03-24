@@ -13,20 +13,7 @@ var FlakeIdGen = require('flake-idgen')
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-
-var mongoose = require('mongoose');
-
-var channelSchema = new mongoose.Schema({
-	name: String,
-	owner: String,
-	date: Date,
-	uniq: String,
-	tags: String,
-});
-mongoose.model('Channel', channelSchema); 
-mongoose.connect('mongodb://localhost:27017/attune');
-
-var Channel = mongoose.model('Channel');
+var db = require('./models');
 
 //middleware
 app.use('/public', express.static(__dirname + '/public', { maxAge: ONEDAY }));
@@ -69,7 +56,7 @@ app.get('/room/:uniq', function (req, res) {
 			var uniq = req.params.uniq;
 			console.log('[log] : GET /room/'+uniq);
 			//search for room
-			Channel.findOne({uniq:uniq}, function(err, channel) {
+			db.Channel.findOne({uniq:uniq}, function(err, channel) {
 				//res.json({'room':channels});  
 				if (channel) {
 					res.json(channel);
@@ -91,7 +78,7 @@ app.get('/room/:uniq', function (req, res) {
 */
 app.get('/room', function(req, res) {
 	console.log('[log] : GET /room');
-	Channel.find({}, function(err, channels) {
+	db.Channel.find({}, function(err, channels) {
 		res.json({'rooms':channels});  
 	});
 });
@@ -121,7 +108,7 @@ app.post('/room', function(req, res){
 		uniq : uniq,
 		tags : ''
 	}
-	var c = new Channel(channel);
+	var c = new db.Channel(channel);
 	c.save(function(err) {
 		if (err) {
 			console.log(err);

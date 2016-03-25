@@ -1,9 +1,6 @@
-<<<<<<< HEAD
+
 var ONEDAY = 86400000;
 
-
-=======
->>>>>>> master
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -15,7 +12,6 @@ var FlakeIdGen = require('flake-idgen')
     , intformat = require('biguint-format')
     , generator = new FlakeIdGen;
 
-<<<<<<< HEAD
 
 var app = express();
 var http = require('http').Server(app);

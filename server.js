@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 var ONEDAY = 86400000;
 
 
+=======
+>>>>>>> master
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -12,6 +15,7 @@ var FlakeIdGen = require('flake-idgen')
     , intformat = require('biguint-format')
     , generator = new FlakeIdGen;
 
+<<<<<<< HEAD
 
 var app = express();
 var http = require('http').Server(app);
@@ -28,9 +32,6 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 var users = {};
 
 app.use(express.static(__dirname + '/public'));
-
-
-//Routes
 
 //index
 app.get('/', function (req, res) {
@@ -151,4 +152,5 @@ io.on('connection', function(socket){
 
 http.listen(5000, function () {
   console.log('Attune listening on port 5000!');
+
 });

@@ -1,4 +1,7 @@
+
 var ONEDAY = 86400000;
+
+
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -25,10 +28,14 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 //getto database
 var users = {};
 
+app.use(express.static(__dirname + '/public'));
+
+
 //Routes
 
 //index
 app.get('/', function (req, res) {
+
 	console.log('[log] : GET /');
 	res.sendFile(__dirname + '/views/index.html');
 });
@@ -58,7 +65,7 @@ app.get('/channel/:uniq', function (req, res) {
 			console.log('[log] : GET /channel/'+uniq);
 			//search for channel
 			db.Channel.findOne({uniq:uniq}, function(err, channel) {
-				//res.json({'channel':channels});  
+				//res.json({'channel':channels});
 				if (err) {
 					console.log('[log] : Error - ',err);
 				} else if (channel) {
@@ -81,7 +88,7 @@ app.get('/channel/:uniq', function (req, res) {
 app.get('/channel', function(req, res) {
 	console.log('[log] : GET /channel');
 	db.Channel.find({}, function(err, channels) {
-		res.json({'channels':channels});  
+		res.json({'channels':channels});
 	});
 });
 
@@ -132,7 +139,7 @@ io.on('connection', function(socket){
 		console.log('User disconnected');
 	});
 	socket.on('set player state', function(state, time) {
-		
+
 		console.log('Channel: '+socket.channel_id+' set player state: ' + state +' time: '+time);
 		io.to(channelId).emit('set player state', state, time);
 	});
@@ -147,4 +154,10 @@ http.listen(5000, function () {
   console.log('Attune listening on port 5000!');
 });
 
+  res.sendFile(__dirname + '/views/index.html');
+});
 
+app.listen(5000, function () {
+  console.log('Example app listening on port 5000!');
+});
+>>>>>>> master

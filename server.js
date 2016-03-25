@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var multer = require('multer'); // v1.0.5
 var upload = multer(); // for parsing multipart/form-data
+//var routes = require('routes/routes.js');
 
 var FlakeIdGen = require('flake-idgen')
     , intformat = require('biguint-format')
@@ -39,106 +40,105 @@ app.get('/lobby', function (req, res) {
 	res.sendFile(__dirname + '/views/lobby.html');
 });
 /*
-*	GET: /room/**uniq**
+*	GET: /channel/**uniq**
 *
-*	Servers the view for a room with the unique id
+*	Servers the view for a channel with the unique id
 *
-*	return room.html
+*	return channel.html
 */
-app.get('/room/:uniq', function (req, res) {
+app.get('/channel/:uniq', function (req, res) {
 	res.format({
 		html: function() {
 			var uniq = req.params.uniq;
-			console.log('[log] : GET /view/room/'+uniq);
-			res.sendFile(__dirname + '/views/room.html');
+			console.log('[log] : GET /channel/'+uniq);
+			res.sendFile(__dirname + '/views/channel.html');
 		},
 		json: function() {
 			var uniq = req.params.uniq;
-			console.log('[log] : GET /room/'+uniq);
-			//search for room
+			console.log('[log] : GET /channel/'+uniq);
+			//search for channel
 			db.Channel.findOne({uniq:uniq}, function(err, channel) {
-				//res.json({'room':channels});  
-				if (channel) {
+				//res.json({'channel':channels});  
+				if (err) {
+					console.log('[log] : Error - ',err);
+				} else if (channel) {
 					res.json(channel);
 				} else {
 					res.json({ error: 'Not found' });
 				}
-				});
-
+			});
 		}
 	});
 });
 
 /*
-*	GET: /room
+*	GET: /channel
 *
-*	Lists all the rooms in json format
+*	Lists all the channels in json format
 *
 *	return [{name:'',owner:''},....]
 */
-app.get('/room', function(req, res) {
-	console.log('[log] : GET /room');
+app.get('/channel', function(req, res) {
+	console.log('[log] : GET /channel');
 	db.Channel.find({}, function(err, channels) {
-		res.json({'rooms':channels});  
+		res.json({'channels':channels});  
 	});
 });
 
-// creates a new room uniquely named room
+// creates a new channel uniquely named channel
 // may remove unique ids since names are unique however some names may not work in urls
 /*
-*	POST: /room
+*	POST: /channel
 *
 *	Body: {
-*		name:'',
-*		owner: '',
+*		name: String,
+*		owner: String,
 *	}
 *
-*	Creates a new room with the info provided and returns information on the room in json format
+*	Creates a new channel with the info provided and returns information on the channel in json format
 *
 *	return {name:'',owner:''}
 */
-app.post('/room', function(req, res){
-	console.log('[log] : POST /room');
+app.post('/channel', function(req, res){
+	console.log('[log] : POST /channel');
 	console.log('[log] : Body: '+ req.body.name);
 	var uniq = intformat(generator.next(), 'dec');
-	var channel = {
+	db.Channel.create({
 		name : req.body.name,
 		owner : 'guest',
 		date : Date.now(),
 		uniq : uniq,
-		tags : ''
-	}
-	var c = new db.Channel(channel);
-	c.save(function(err) {
+	}, function(err, channel) {
 		if (err) {
 			console.log(err);
 		} else {
 			res.json(channel);
 		}
-		
-	})
+	});
 });
 
 
 //Sockets
 io.on('connection', function(socket){
 	console.log('a user connected');
-	socket.on('addUser', function(data){ //adds user to room
-		console.log('Added user to room: '+data.room_id);
-		socket.join(data.room_id);
-		socket.room_id = data.room_id;
-		socket.user = data.user;
+	var channelId
+	socket.on('addUser', function(data){ //adds user to channel
+		console.log('Added user to channel: '+data);
+		socket.join(data);
+		channelId = data;
+		//socket.user = data.user;
 	});
 	socket.on('disconnect', function(){
 		console.log('User disconnected');
 	});
-	socket.on('set player state', function(state) {
-		console.log('Room: '+socket.room_id+' set player state: ' + state);
-		io.to(socket.room_id).emit('set player state', state);
+	socket.on('set player state', function(state, time) {
+		
+		console.log('Channel: '+socket.channel_id+' set player state: ' + state +' time: '+time);
+		io.to(channelId).emit('set player state', state, time);
 	});
 	socket.on('chat message', function(msg){
-		console.log('Room: '+socket.room_id+' message: ' + msg);
-		io.to(socket.room_id).emit('chat message', msg);
+		console.log('Channel: '+socket.channel_id+' message: ' + msg);
+		io.to(channelId).emit('chat message', msg);
 	});
 });
 

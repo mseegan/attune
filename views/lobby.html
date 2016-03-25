@@ -22,13 +22,14 @@
 	</style>
 	<script src="http://code.jquery.com/jquery-1.9.0rc1.js"></script>
 	<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+	<script src="/public/js/lobby.js"></script>
 </head>
 <body onload="loadPage()">
 	<div class="lobby">
 		<h1>Attune Lobby</h1>
 	</div>
 	<div class="lobby">
-		<button  onclick="createRoomFormSetVisibilty('block')">Create Room</button>
+		<button  onclick="createChannelFormSetVisibilty('block')">Create Channel</button>
 		<button onclick="updateTable()">Reload</button>
 		<form style="float: right;">
 			<input type="text" name="query"></input>
@@ -36,96 +37,21 @@
 			
 		</form>
 	</div>
-	<div id="createRoomForm" class="lobby">
+	<div id="createChannelForm" class="lobby">
 		<form>
-			Room Name:<br>
-			<input id="roomName" type="text" name="roomName"><br>
-			<input type="button" value="Create" onclick="createRoom()">
-			<input type="button" value="Cancel" onclick="createRoomFormSetVisibilty('none')"/>
+			Channel Name:<br>
+			<input id="channelName" type="text" name="channelName"><br>
+			<input type="button" value="Create" onclick="createChannel()">
+			<input type="button" value="Cancel" onclick="createChannelFormSetVisibilty('none')"/>
 		</form>
 	</div>
 	<div class="lobby">
-		<table id="roomsTable" class="lobbyTable" style="width:100%">
+		<table id="channelsTable" class="lobbyTable" style="width:100%">
 			<tr>
-				<th>Room Name</th>
+				<th>Channel Name</th>
 				<th>Owner</th>
 			</tr>
 		</table>
 	</div>
-	<script>
-		function loadPage() {
-			createRoomFormSetVisibilty('none');
-			updateTable();
-		}
-		
-		function updateTable() {
-			$.ajax({
-				url: "/room",
-				success: function(result) {
-					var roomsTable = document.getElementById("roomsTable");
-					var tableLength = roomsTable.rows.length-1;
-					for (var r=0; r<tableLength; r++) {
-						roomsTable.deleteRow(1);
-					}
-					var rooms = result['rooms'];
-					for (var r=0; r<rooms.length; r++) {
-						addRow(roomsTable, rooms[r]);
-					}
-				}
-			});
-		}
-		/*
-			addRow
-			tableEl - dom table element
-			row - dictionary of all the elements in a row (name, owner, date, uniq)
-		*/
-		function addRow(tableEl, row) {
-			var rowEl = tableEl.insertRow();
-			rowEl.style = "outline: thin solid black;cursor: pointer;"
-			var nameCell = rowEl.insertCell(0);
-			var nameOwner = rowEl.insertCell(1);
-			nameCell.innerHTML = row.name;
-			nameOwner.innerHTML = row.owner;
-			$(rowEl).on('click', function() {
-				//alert('you clicked ' + row['uniq']);
-				window.open('/room/'+row.uniq, '_blank');
-				
-			});
-		}
-		function createRoomFormSetVisibilty(visible) {
-			$('#createRoomForm').css("display", visible);
-		};
-		function createRoom() {
-			var newRoom = $('#roomName').val();
-			var data = {
-				name: newRoom,
-				owner: 'guest'
-			};
-			$('#roomName').val('');
-			var data = JSON.stringify(data);
-			$.ajax({
-				url: "/room",
-				type: "POST",
-				contentType: 'application/json',
-				dataType: 'json',
-				data: data,
-				success: function() {
-					
-				},
-			});
-			createRoomFormSetVisibilty('none');
-			updateTable();
-		}
-	</script>
-	
-	<!--
-	<script>
-		var socket = io.connect('http://localhost');
-		socket.on('news', function (data) {
-			console.log(data);
-			socket.emit('my other event', { my: 'data' });
-		});
-	</script>
-	-->
 </body>
 </html>

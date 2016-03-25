@@ -1,4 +1,3 @@
-
 var ONEDAY = 86400000;
 
 
@@ -25,7 +24,7 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 
-//getto database
+//database
 var users = {};
 
 app.use(express.static(__dirname + '/public'));
@@ -152,11 +151,4 @@ io.on('connection', function(socket){
 
 http.listen(5000, function () {
   console.log('Attune listening on port 5000!');
-});
-
-  res.sendFile(__dirname + '/views/index.html');
-});
-
-app.listen(5000, function () {
-  console.log('Example app listening on port 5000!');
 });

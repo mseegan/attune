@@ -98,11 +98,13 @@ $( document ).ready(function() {
 		var match = $('#videoUrl').val().match(regExp);
 		if (match && match[2].length == 11) {
 			player.loadVideoById(match[2]);
-		}else
+		}else {
 		player.loadVideoById("TSXXi2kvl_0");
+	}
+	return false;
 	});
 
-	$('form').submit(function(){
+	$('#chatForm').submit(function(){
 		socket.emit('chat message', $('#m').val());
 		return false;
 	});

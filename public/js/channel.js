@@ -99,7 +99,7 @@ $( document ).ready(function() {
 		if (match && match[2].length == 11) {
 			player.loadVideoById(match[2]);
 		}else
-		//error
+		player.loadVideoById("TSXXi2kvl_0");
 	});
 
 	$('form').submit(function(){

@@ -1,122 +1,65 @@
 var ONEDAY = 86400000;
 
 var express = require('express');
+//var http = require('http');
+var path = require('path');
+var app = express();
+var server = require('http').Server(app);
+var fs = require('fs');
+var expressHbs  = require('express-handlebars');
 var bodyParser = require('body-parser');
 var multer = require('multer'); // v1.0.5
 var upload = multer(); // for parsing multipart/form-data
-//var routes = require('routes/routes.js');
 
-var FlakeIdGen = require('flake-idgen')
-    , intformat = require('biguint-format')
-    , generator = new FlakeIdGen;
+var io = require('socket.io')(server);
 
 
-var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var db = require('./models');
+// database connection
+//var mongoose = require('mongoose');
+//mongoose.connect('mongodb://localhost/mydb');
 
-//middleware
-app.use('/public', express.static(__dirname + '/public', { maxAge: ONEDAY }));
+// middleware and environment varibles
+app.set('port', process.env.PORT || 5000);
+app.set('views', __dirname + '/views');
+var exphbs = require('express-handlebars');
+app.engine('.hbs', exphbs({extname: '.hbs'}));
+app.set('view engine', '.hbs');
+
+//app.use(express.favicon());
+//app.use(express.logger('dev'));
+
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
+//app.use(express.methodOverride());
+//app.use(express.cookieParser('your secret here'));
+//app.use(express.session());
+//app.use(app.router);
+app.use('/public', express.static(__dirname + '/public', { maxAge: ONEDAY }));
 
-//database
-var users = {};
-
-//Routes
-
-//index
-app.get('/', function (req, res) {
-	console.log('[log] : GET /');
-	res.sendFile(__dirname + '/views/index.html');
+server.listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
 });
 
 
-//
-app.get('/lobby', function (req, res) {
-	console.log('[log] : GET /lobby');
-	res.sendFile(__dirname + '/views/lobby.html');
+// dynamically include routes (Controller)
+fs.readdirSync('./controllers').forEach(function (file) {
+  if(file.substr(-3) == '.js') {
+      route = require('./controllers/' + file);
+	  var router = express.Router();
+      route.controller(router, app);
+	  var controller_name = route.name || '/'+file.substring( 0, file.indexOf( ".js" ));
+	  var controller_endpoint = ''
+	  if (controller_name=='index') { //index entry point will be /
+			controller_endpoint = '/';
+			app.use(controller_endpoint, router);
+	  } else {
+			controller_endpoint = '/'+controller_name;
+			app.use(controller_endpoint, router);
+	  }
+	  console.log('[log] Initialized: '+controller_name+' controller -> Served at: '+controller_endpoint);
+  }
 });
-/*
-*	GET: /channel/**uniq**
-*
-*	Servers the view for a channel with the unique id
-*
-*	return channel.html
-*/
-app.get('/channel/:uniq', function (req, res) {
-	res.format({
-		html: function() {
-			var uniq = req.params.uniq;
-			console.log('[log] : GET /channel/'+uniq);
-			res.sendFile(__dirname + '/views/channel.html');
-		},
-		json: function() {
-			var uniq = req.params.uniq;
-			console.log('[log] : GET /channel/'+uniq);
-			//search for channel
-			db.Channel.findOne({uniq:uniq}, function(err, channel) {
-				//res.json({'channel':channels});  
-				if (err) {
-					console.log('[log] : Error - ',err);
-				} else if (channel) {
-					res.json(channel);
-				} else {
-					res.json({ error: 'Not found' });
-				}
-			});
-		}
-	});
-});
-
-/*
-*	GET: /channel
-*
-*	Lists all the channels in json format
-*
-*	return [{name:'',owner:''},....]
-*/
-app.get('/channel', function(req, res) {
-	console.log('[log] : GET /channel');
-	db.Channel.find({}, function(err, channels) {
-		res.json({'channels':channels});  
-	});
-});
-
-// creates a new channel uniquely named channel
-// may remove unique ids since names are unique however some names may not work in urls
-/*
-*	POST: /channel
-*
-*	Body: {
-*		name: String,
-*		owner: String,
-*	}
-*
-*	Creates a new channel with the info provided and returns information on the channel in json format
-*
-*	return {name:'',owner:''}
-*/
-app.post('/channel', function(req, res){
-	console.log('[log] : POST /channel');
-	console.log('[log] : Body: '+ req.body.name);
-	var uniq = intformat(generator.next(), 'dec');
-	db.Channel.create({
-		name : req.body.name,
-		owner : 'guest',
-		date : Date.now(),
-		uniq : uniq,
-	}, function(err, channel) {
-		if (err) {
-			console.log(err);
-		} else {
-			res.json(channel);
-		}
-	});
-});
-
 
 //Sockets
 io.on('connection', function(socket){
@@ -143,7 +86,4 @@ io.on('connection', function(socket){
 });
 
 
-http.listen(5000, function () {
-  console.log('Attune listening on port 5000!');
-});
 

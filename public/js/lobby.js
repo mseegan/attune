@@ -6,6 +6,8 @@ function loadPage() {
 function updateTable() {
 	$.ajax({
 		url: "/channel",
+		contentType: 'application/json',
+		dataType: 'json',
 		success: function(result) {
 			var channelsTable = document.getElementById("channelsTable");
 			var tableLength = channelsTable.rows.length-1;

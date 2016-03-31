@@ -4,7 +4,7 @@
   "description": "View streaming video together",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node ./node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -25,7 +25,9 @@
     "biguint-format": "^1.0.0",
     "body-parser": "^1.15.0",
     "express": "^4.13.4",
+    "express-handlebars": "^3.0.0",
     "flake-idgen": "^1.0.0",
+    "mocha": "^2.4.5",
     "mongoose": "^4.4.6",
     "multer": "^1.1.0",
     "socket.io": "^1.4.5"

@@ -75,7 +75,7 @@ io.on('connection', function(socket){
 		console.log('User disconnected');
 	});
 	socket.on('set player state', function(state, time) {
-		
+
 		console.log('Channel: '+socket.channel_id+' set player state: ' + state +' time: '+time);
 		io.to(channelId).emit('set player state', state, time);
 	});
@@ -83,7 +83,7 @@ io.on('connection', function(socket){
 		console.log('Channel: '+socket.channel_id+' message: ' + msg);
 		io.to(channelId).emit('chat message', msg);
 	});
+  socket.on('load video', function(id) {
+    io.to(channelId).emit('load video', id);
+  });
 });
-
-
-

@@ -97,14 +97,18 @@ $( document ).ready(function() {
 		var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
 		var match = $('#videoUrl').val().match(regExp);
 		if (match && match[2].length == 11) {
+			var vidId = match[2];
 			player.loadVideoById(match[2]);
+			socket.emit('load video', vidId);
 		}else {
-		player.loadVideoById("TSXXi2kvl_0");
+		var noId = "TXXi2kvl_0"
+		player.loadVideoById(noId);
+		socket.emit('load video', noId);
 	}
 	return false;
 	});
 
-	$('#chatForm').submit(function(){
+	$('form').submit(function(){
 		socket.emit('chat message', $('#m').val());
 		return false;
 	});
@@ -114,6 +118,10 @@ $( document ).ready(function() {
 	});
 	socket.on('set player state', function(state,time){
 		setPlayerState(state,time);
+	});
+	socket.on('load video', function(id){
+		player.loadVideoById(id);
+		return false;
 	});
 
 	function setChannel(channel) {

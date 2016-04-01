@@ -37,7 +37,7 @@ function onStateChange(event) {
 	if (playerState == YT.PlayerState.PLAYING) {
 		socket.emit('set player state', playerState, playerTime);
 		console.log("Player set to playing");
-		//console.log(player.getCurrentTime())
+		//console.log(player.getCurrentTime())vv
 	} else if (playerState == YT.PlayerState.PAUSED) {
 		console.log("Player set to paused");
 		socket.emit('set player state', playerState, playerTime);
@@ -52,7 +52,7 @@ function setPlayerState(state,time) {
 	if (state == YT.PlayerState.PLAYING) {
 		if (player.getCurrentTime().toPrecision(2) != time.toPrecision(2) && player.getPlayerState() != state) {
 			player.seekTo(time);
-		} 
+		}
 		player.playVideo();
 		console.log("Set Player to playing at: "+time);
 		//console.log(player.getCurrentTime())
@@ -60,15 +60,16 @@ function setPlayerState(state,time) {
 		player.pauseVideo()
 		console.log("Set Player to paused");
 	}
-	
+
 }
+
 
 
 
 $( document ).ready(function() {
 	console.log("channel.js is running");
 
-	
+
 	var url = document.documentURI;
 	var uniq = "";
 	var matches = url.match(/\/channel\/([^\/]+)/);
@@ -97,11 +98,13 @@ $( document ).ready(function() {
 		var match = $('#videoUrl').val().match(regExp);
 		if (match && match[2].length == 11) {
 			player.loadVideoById(match[2]);
-		}else
-		//error
+		}else {
+		player.loadVideoById("TSXXi2kvl_0");
+	}
+	return false;
 	});
 
-	$('form').submit(function(){
+	$('#chatForm').submit(function(){
 		socket.emit('chat message', $('#m').val());
 		return false;
 	});
@@ -118,4 +121,4 @@ $( document ).ready(function() {
 	};
 
 
-});	
+});

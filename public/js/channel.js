@@ -89,8 +89,18 @@ $( document ).ready(function() {
 	} else {
 		// no match for the category
 	}
-	
-	
+	// load new video
+	$('#loadUrl').click (function loadVideo() {
+		console.log("button is pressed");
+		console.log($('#videoUrl').val());
+		var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+		var match = $('#videoUrl').val().match(regExp);
+		if (match && match[2].length == 11) {
+			player.loadVideoById(match[2]);
+		}else
+		//error
+	});
+
 	$('form').submit(function(){
 		socket.emit('chat message', $('#m').val());
 		return false;

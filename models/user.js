@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var channelSchema = require('./channel');
 var Schema = mongoose.Schema;
 
 var userSchema = new Schema({

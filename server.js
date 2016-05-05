@@ -7,7 +7,7 @@ var ONEDAY = 86400000,
  server = require('http').Server(app),
  fs = require('fs'),
  expressHbs  = require('express-handlebars'),
- cookieParser = require('cookieParser'),
+ cookieParser = require('cookie-parser'),
  bodyParser = require('body-parser'),
  multer = require('multer'), // v1.0.5
  upload = multer(), // for parsing multipart/form-data
@@ -50,8 +50,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-//routes
-require('./app/routes.js')(app, passport);
 
 //app.use(express.methodOverride());
 //app.use(express.cookieParser('your secret here'));

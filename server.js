@@ -1,21 +1,28 @@
-var ONEDAY = 86400000;
+var ONEDAY = 86400000,
 
-var express = require('express');
-//var http = require('http');
-var path = require('path');
-var app = express();
-var server = require('http').Server(app);
-var fs = require('fs');
-var expressHbs  = require('express-handlebars');
-var bodyParser = require('body-parser');
-var multer = require('multer'); // v1.0.5
-var upload = multer(); // for parsing multipart/form-data
+ express = require('express'),
+// http = require('http'),
+ path = require('path'),
+ app = express(),
+ server = require('http').Server(app),
+ fs = require('fs'),
+ expressHbs  = require('express-handlebars'),
+ cookieParser = require('cookie-parser'),
+ bodyParser = require('body-parser'),
+ multer = require('multer'), // v1.0.5
+ upload = multer(), // for parsing multipart/form-data
 
-var io = require('socket.io')(server);
+ morgan = require('morgan'),
+ passport = require('passport'),
+ flash = require('connect-flash'),
+ session = require('express-session'),
+
+ io = require('socket.io')(server),
 
 
 // database connection
-//var mongoose = require('mongoose');
+ mongoose = require('mongoose'),
+ db = require('./models');
 //mongoose.connect('mongodb://localhost/mydb');
 
 // middleware and environment varibles
@@ -25,11 +32,24 @@ var exphbs = require('express-handlebars');
 app.engine('.hbs', exphbs({extname: '.hbs'}));
 app.set('view engine', '.hbs');
 
+//////////////////////////////
+//set up express application//
+//////////////////////////////
 //app.use(express.favicon());
 //app.use(express.logger('dev'));
-
+app.use(morgan('dev'));
+app.use(cookieParser());
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
+//////////////////////////////
+//required for passport///////
+//////////////////////////////
+app.use(session({ secret: 'iloveanime'}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+
 
 //app.use(express.methodOverride());
 //app.use(express.cookieParser('your secret here'));

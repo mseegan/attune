@@ -4,8 +4,8 @@ var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
 	name: String,
-	password: String,
-	channel: [channelSchema]
+	password: String
+	// channel: [channelSchema]
 });
 
 var User = mongoose.model('User', userSchema);

@@ -2,7 +2,7 @@
 <html lang="en-us">
 <head>
 	<title>Attune Channel</title>
-	<script src="http://code.jquery.com/jquery-1.9.0rc1.js"></script>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 	<script src="/public/js/channel.js"></script>
 	<link rel="stylesheet" type="text/css" href="/public/css/styles.css">
@@ -12,6 +12,7 @@
 	<div class="channel">
 		<h1 id="title">Channel: {{name}}</h1>
 	</div>
+<label>Username: <input id="n" autocomplete="off" maxlength="16"/></label><br/>
 	<div>
 		<form>
 			Enter Url or video Id here: </br>
@@ -20,7 +21,7 @@
 	</div>
 	<div id="player"></div>
 	<ul id="messages"></ul>
-	<form id="chatForm" action="">
+	<form  class="col-sm-8" id="chatForm" action="">
 		<input id="m" autocomplete="off" /><button>Send</button>
 	</form>
 </body>

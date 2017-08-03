@@ -26,10 +26,10 @@ module.exports.controller = function(router, app) {
 *	Lists all the channels in json format
 *
 *	return [{name:'',owner:''},....]
-*/				
+*/
 				json: function(){
 					db.Channel.find({}, function(err, channels) {
-						res.json({'channels':channels});  
+						res.json({'channels':channels});
 					});
 				}
 			});
@@ -65,9 +65,9 @@ module.exports.controller = function(router, app) {
 				}
 			});
 		});
-	
+
 	router.route('/:uniq')
-		
+
 		.get(function (req, res) {
 			var uniq = req.params.uniq;
 			console.log('[log] : GET /channel/'+uniq);
@@ -92,7 +92,7 @@ module.exports.controller = function(router, app) {
 				json: function() {
 					//search for channel
 					db.Channel.findOne({uniq:uniq}, function(err, channel) {
-						//res.json({'channel':channels});  
+						//res.json({'channel':channels});
 						if (err) {
 							console.log('[log] : Error - ',err);
 						} else if (channel) {

@@ -2,20 +2,20 @@ $(document).ready(function() {
 	console.log("channel.js is running");
 
 	var socket = io();
+	var roomId = window.location.pathname.split('/')[2];
 
 	// 2. This code loads the IFrame Player API code asynchronously.
 
 	var tag = document.createElement('script');
 	tag.src = "https://www.youtube.com/iframe_api";
 	var firstScriptTag = document.getElementsByTagName('script')[0];
-	var roomId = window.location.pathname.split('/')[2];
 	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+	socket.emit('create', roomId);
 	// 3. This function creates an <iframe> (and YouTube player)
 	//    after the API code downloads.
-	socket.emit('create', roomId);
 	var player;
-	function onYouTubeIframeAPIReady() {
+	window.onYouTubeIframeAPIReady = function() {
 		player = new YT.Player('player', {
 			height: '390',
 			width: '640',

@@ -84,18 +84,17 @@ fs.readdirSync('./controllers').forEach(function (file) {
 //Sockets
 io.on('connection', function(socket){
 	console.log('a user connected');
-	var roomId
-
+	var roomId;
   socket.on('create', function(room){
     roomId = room;
     socket.join(room);
   });
-	socket.on('addUser', function(data){ //adds user to channel
-		console.log('Added user to channel: '+data);
-		socket.join(data);
-		roomId = data;
-		//socket.user = data.user;
-	});
+	// socket.on('addUser', function(data){ //adds user to channel
+	// 	console.log('Added user to channel: '+data);
+	// 	socket.join(data);
+	// 	roomId = data;
+	// 	//socket.user = data.user;
+	// });
 	socket.on('disconnect', function(){
 		console.log('User disconnected');
 	});
@@ -105,7 +104,7 @@ io.on('connection', function(socket){
 		io.to(roomId).emit('set player state', state, time);
 	});
 	socket.on('chat message', function(username, msg){
-		console.log('Channel: ' + socket.channel_id + 'username: ' + username + ' message: ' + msg);
+		console.log('Channel: ' + roomId + ' username: ' + username + ' message: ' + msg);
 		io.to(roomId).emit('chat message', username + msg);
 	});
   socket.on('load video', function(id) {

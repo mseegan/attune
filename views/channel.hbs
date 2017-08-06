@@ -5,23 +5,42 @@
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 	<script src="/public/js/channel.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="/public/css/styles.css">
 </head>
 <body>
 <body>
-	<div class="channel">
-		<h1 id="title">Channel: {{name}}</h1>
-	</div>
-<label>Username: <input id="n" autocomplete="off" maxlength="16"/></label><br/>
 	<div>
-		<form>
-			Enter Url or video Id here: </br>
-			<input id="videoUrl" autocomplete="off" placeholder="https://www.youtube.com/watch?v=yecrOqC77jY"/><button id="loadUrl">load</button>
-		</form>
+		<div class="channel">
+			<h1 id="title">Channel: {{name}}</h1>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<div class="row">
+					<form class="col-sm-12 urlForm" >
+						Enter Url or video Id here: </br>
+						<input autocomplete="off" id="videoUrl" placeholder="enter url here"/><button id="loadUrl">load</button>
+					</form><br>
+				</div>
+				<div>
+					<div class="col-md-12" id="player"></div>
+				</div>
+			</div>
+			<div class="col-md-6" >
+				<div class="row">
+
+					<div class="col-md-12 messageArea">
+						<ul class="messageArea" id="messages"></ul>
+					</div>
+					<div class="row">
+							<form class="col-md-12" id="chatForm" action="">
+								<label class="col-sm-12">Username: <input value="Anonymous" id="n" autocomplete="off" maxlength="16"/></label>
+								<input class="col-sm-11"type="text" id="m" autocomplete="off"></input><button class="col-sm-1">Send</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div id="player"></div>
-	<ul id="messages"></ul>
-	<form  class="col-sm-8" id="chatForm" action="">
-		<input id="m" autocomplete="off" /><button>Send</button>
-	</form>
 </body>

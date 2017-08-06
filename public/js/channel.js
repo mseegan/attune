@@ -19,7 +19,7 @@ $(document).ready(function() {
 		player = new YT.Player('player', {
 			height: '390',
 			width: '640',
-			videoId: 'yecrOqC77jY',
+			// videoId: 'yecrOqC77jY',
 			events: {
 				'onReady': onPlayerReady,
 				'onStateChange': onStateChange
@@ -97,14 +97,17 @@ $(document).ready(function() {
 		$('#chatForm').submit(function(e){
 			console.log("submit pressed");
 			e.preventDefault();
-			socket.emit('chat message', $('#n').val() + ': ', $('#m').val());
-			$('#m').val('');
+			if ($('#m').val()){
+				socket.emit('chat message', $('#n').val() + ': ', $('#m').val());
+				$('#m').val('');
+			}
 		});
 		$('#loadUrl').click (function loadVideo() {
 			console.log("button is pressed");
 			console.log($('#videoUrl').val());
 			var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
 			var match = $('#videoUrl').val().match(regExp);
+			console.log(match);
 			if (match && match[2].length == 11) {
 				var vidId = match[2];
 				player.loadVideoById(match[2]);

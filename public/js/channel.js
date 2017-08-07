@@ -28,8 +28,7 @@ $(document).ready(function() {
 	}
 	// 4. The API will call this function when the video player is ready.
 	function onPlayerReady(event) {
-		//look up channel state
-		//event.target.playVideo();
+		
 	}
 
 	// 5. The API calls this function when the player's state changes.
@@ -102,9 +101,10 @@ $(document).ready(function() {
 				$('#m').val('');
 			}
 		});
-		$('#loadUrl').click (function loadVideo() {
+		$('#loadUrl').click (function loadVideo(e) {
 			console.log("button is pressed");
 			console.log($('#videoUrl').val());
+			e.preventDefault();
 			var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
 			var match = $('#videoUrl').val().match(regExp);
 			console.log(match);
@@ -112,16 +112,29 @@ $(document).ready(function() {
 				var vidId = match[2];
 				player.loadVideoById(match[2]);
 				socket.emit('load video', vidId);
+				$.ajax({
+					url:'/channel/'+uniq,
+					type: 'PUT',
+					dataType: 'json',
+					data: {current_video: match[2]},
+					success: function(result){
+						console.log('updated current video', result);
+					},
+					error: function(error){
+						console.log('error', error);
+					}
+
+				})
 			}else {
-			var noId = "TXXi2kvl_0"
-			player.loadVideoById(noId);
-			socket.emit('load video', noId);
-		}
+				$('#messages').append($('<li style="color: red;">').text("invalid url"));
+				$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
+			}
 		return false;
 		});
 
 		socket.on('chat message', function(msg){
-			$('#messages').append($('<li>').text(msg));
+			var d = new Date();
+			$('#messages').append($('<li>').text('[' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + '] ' + msg));
 			$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
 		});
 		socket.on('set player state', function(state,time){
@@ -129,8 +142,13 @@ $(document).ready(function() {
 		});
 		socket.on('load video', function(id){
 			player.loadVideoById(id);
+
 			return false;
 		});
+		// socket.on('connection'), function(){
+		// 	socket.emit('request')
+		// }
+
 
 		function setChannel(channel) {
 			$('#title').text('Channel: '+channel.name);

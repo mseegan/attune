@@ -8,9 +8,12 @@ title {
 }
 
 .channel {
-	margin: 10px;
+	margin-bottom: 10px;
 	padding: 10px;
-	background-color: lightgrey;
+	width:100%;
+	background-color: red;
+	color: #e6e6e6;
+	box-shadow: 0px 5px lightgrey;
 }
 
 .chat {
@@ -20,14 +23,15 @@ title {
 }
 
 body {
-	font: 13px Helvetica, Arial;
+	font-family: 'Roboto', sans-serif;
+	font-size: 13px;
+	text-shadow: 3px #666666;
 }
 
 #chatForm {
 	display: inline-block;
 	padding: 3px;
-	border: 1;
-	background-color: lightgrey;
+	background-color: white;
 }
 
 
@@ -35,36 +39,34 @@ body {
 	display: inline-block;
 	padding: 3px;
 	border: 1;
-	background-color: lightgrey;
+	background-color: white;
 }
 
 form input {
 	padding: 3px;
 	display: inline-block;
-	border: 1;
+	border: 1px solid;
 	border-color: lightgrey;
 }
 
 button {
-	background: rgb(130, 224, 255); border: none; padding: 3px;
+	background: lightblue; border: none; padding: 4px;
+	border: 1px;
+	border-color: lightgrey;
 }
 
 
 #messages {
 	margin: 0;
 	padding: 0;
+	border: 1px solid;
+	border-color: #666666;
 	box-sizing: border-box;
 	height: 440px;
 	/*width: 800px;*/
 	word-break: break-word;
 	overflow-y: scroll;
 	overflow-x: auto;
-}
-
-#videoUrl{
-	width:33%;
-	float:left;
-	box-sizing: border-box;
 }
 
 #videoId {

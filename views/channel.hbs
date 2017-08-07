@@ -7,23 +7,24 @@
 	<script src="/public/js/channel.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="/public/css/styles.css">
+	<link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 </head>
 <body>
 <body>
-	<div>
-		<div class="channel">
-			<h1 id="title">Channel: {{name}}</h1>
-		</div>
-		<div class="row">
+	<header>
+		<h1 class="channel" id="title"><strong>Channel: {{name}}</strong></h1>
+	</header>
+	<div class="row">
+		<div class="col-md-12">
 			<div class="col-md-6">
-				<div class="row">
-					<form class="col-sm-12 urlForm" >
-						Enter Url or video Id here: </br>
-						<input autocomplete="off" id="videoUrl" placeholder="enter url here"/><button id="loadUrl">load</button>
-					</form><br>
-				</div>
 				<div>
 					<div class="col-md-12" id="player"></div>
+				</div>
+				<div class="row">
+					<form class="col-md-12 urlForm" >
+						<input class="col-md-11" autocomplete="off" id="videoUrl" placeholder="enter url here"/><button class="col-md-1" id="loadUrl"><strong>load</strong></button>
+					</form><br>
 				</div>
 			</div>
 			<div class="col-md-6" >
@@ -34,8 +35,8 @@
 					</div>
 					<div class="row">
 							<form class="col-md-12" id="chatForm" action="">
-								<label class="col-sm-12">Username: <input value="Anonymous" id="n" autocomplete="off" maxlength="16"/></label>
-								<input class="col-sm-11"type="text" id="m" autocomplete="off"></input><button class="col-sm-1">Send</button>
+								<label class="col-md-12">Name: <input value="Anonymous" id="n" autocomplete="off" maxlength="16"/></label>
+								<input class="col-md-11"type="text" id="m" placeholder="Say something..." autocomplete="off"></input><button class="col-md-1"><strong>Send</strong></button>
 							</form>
 						</div>
 					</div>

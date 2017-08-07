@@ -4,7 +4,9 @@ var Schema = mongoose.Schema;
 var channelSchema = new Schema({
 	name: String,
 	owner: String,
+	current_video: String,
 	date: Date,
+	queue: Array,
 	uniq: String
 });
 

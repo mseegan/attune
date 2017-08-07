@@ -80,17 +80,6 @@ fs.readdirSync('./controllers').forEach(function (file) {
 	  console.log('[log] Initialized: '+controller_name+' controller -> Served at: '+controller_endpoint);
   }
 });
-//update current video on individual channel
-app.put('channel/:uniq',function update(req, res){
-  db.Channel.findOne({uniq: matches[1]}, function(err, foundChannel){
-    if (err) {console.log('error', err)}
-    foundChannel.current_video = id;
-    foundChannel.save(function(err, saved){
-      if (err) {console.log('error', err)}
-      res.json(saved);
-    })
-  });
-});
 //Sockets
 io.on('connection', function(socket){
 	console.log('a user connected');
@@ -119,6 +108,7 @@ io.on('connection', function(socket){
 	});
   socket.on('load video', function(id) {
     currentVideoId = id;
+    console.log('current video id', currentVideoId)
     io.to(roomId).emit('load video', id);
     console.log('current id', currentVideoId);
   });

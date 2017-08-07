@@ -28,7 +28,26 @@ $(document).ready(function() {
 	}
 	// 4. The API will call this function when the video player is ready.
 	function onPlayerReady(event) {
-		
+		var url = document.documentURI;
+		var uniq = "";
+		var matches = url.match(/\/channel\/([^\/]+)/);
+		if (matches) {
+			uniq = matches[1];    // "whatever"
+			socket.emit('addUser', {
+				user: 'guest',
+				channel_id: uniq
+			});
+			$.ajax({
+				url:'/channel/'+uniq,
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(result) {
+					setChannel(result);
+				}
+			})
+		} else {
+			// no match for the category
+		}
 	}
 
 	// 5. The API calls this function when the player's state changes.
@@ -65,33 +84,6 @@ $(document).ready(function() {
 		}
 
 	}
-
-
-
-
-
-
-
-		var url = document.documentURI;
-		var uniq = "";
-		var matches = url.match(/\/channel\/([^\/]+)/);
-		if (matches) {
-			uniq = matches[1];    // "whatever"
-			socket.emit('addUser', {
-				user: 'guest',
-				channel_id: uniq
-			});
-			$.ajax({
-				url:'/channel/'+uniq,
-				contentType: 'application/json',
-				dataType: 'json',
-				success: function(result) {
-					setChannel(result);
-				}
-			})
-		} else {
-			// no match for the category
-		}
 		// load new video
 		$('#chatForm').submit(function(e){
 			console.log("submit pressed");
@@ -142,7 +134,6 @@ $(document).ready(function() {
 		});
 		socket.on('load video', function(id){
 			player.loadVideoById(id);
-
 			return false;
 		});
 		// socket.on('connection'), function(){
@@ -152,6 +143,8 @@ $(document).ready(function() {
 
 		function setChannel(channel) {
 			$('#title').text('Channel: '+channel.name);
+			id = channel.current_video
+			player.loadVideoById(id);
 		};
 
 

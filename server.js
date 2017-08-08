@@ -110,7 +110,14 @@ io.on('connection', function(socket){
 
 	socket.on('disconnect', function(){
 		console.log('User disconnected: ', this.id);
-    clients.splice(clients.indexOf(socket), 1);
+    for (client in clients) {
+      if (clients[client].sessionId === this.id){
+        console.log("we have a match!", this.id);
+        console.log("session ID for reference: ", clients[client].sessionId);
+        clients.splice(client, 1);
+      }
+    }
+    console.log('clients', clients);
     io.to(roomId).emit('update name list', clients);
 	});
   socket.on('name change', function(socketId, newName){

@@ -4,7 +4,8 @@ var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
 	name: String,
-	password: String
+	channel: String,
+	sessionId: String
 	// channel: [channelSchema]
 });
 

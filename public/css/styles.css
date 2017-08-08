@@ -33,7 +33,11 @@ body {
 	padding: 3px;
 	background-color: white;
 }
-
+ul {
+	list-style-type: none;
+	padding:0px;
+	margin:0px;
+}
 
 .urlForm{
 	display: inline-block;

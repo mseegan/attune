@@ -81,12 +81,20 @@ fs.readdirSync('./controllers').forEach(function (file) {
   }
 });
 //Sockets
+var clients = [];
 io.on('connection', function(socket){
-	console.log('a user connected');
+  clients.push({ 'name': 'Anonymous', 'sessionId': socket.id});
+  console.log("CLIENTS: ", clients);
+	console.log('user connected: ' + socket.id);
 	var roomId;
   socket.on('create', function(room){
     roomId = room;
     socket.join(room);
+  });
+  socket.on('user connected', function(){
+    // console.log("ran");
+    socket.emit('new user', socket.id);
+    io.to(roomId).emit('update name list', clients);
   });
 	// socket.on('addUser', function(data){ //adds user to channel
 	// 	console.log('Added user to channel: '+data);
@@ -94,22 +102,49 @@ io.on('connection', function(socket){
 	// 	roomId = data;
 	// 	//socket.user = data.user;
 	// });
-	socket.on('disconnect', function(){
-		console.log('User disconnected');
-	});
-	socket.on('set player state', function(state, time) {
 
-		console.log('Channel: '+socket.channel_id+' set player state: ' + state +' time: '+time);
+
+
+  // socket.on('new player state', function(){
+  //   socket.broadcast.to(roomId).emit('chat message', "welcome");
+  //   socket.broadcast.to(roomId).emit('request player state');
+  // });
+  // socket.on('respond player state', function(state, time){
+  //   io.to(roomId).emit('set player state', state, time);
+  // });
+
+
+
+
+
+	socket.on('disconnect', function(){
+		console.log('User disconnected: ', this.id);
+    clients.splice(clients.indexOf(socket), 1);
+	});
+  socket.on('name change', function(socketId, newName){
+    // console.log('newName: ', newName);
+    // console.log("socketId: ", socketId);
+    // console.log("clients: ", clients);
+    for (client in clients) {
+      if (socketId == clients[client].sessionId){
+        clients[client].name = newName;
+        // console.log("new name: ", clients[client].name);
+      }
+    }
+    io.to(roomId).emit('update name list', clients);
+  });
+	socket.on('set player state', function(state, time) {
+		// console.log('Channel: '+socket.channel_id+' set player state: ' + state +' time: '+time);
 		io.to(roomId).emit('set player state', state, time);
 	});
 	socket.on('chat message', function(username, msg){
-		console.log('Channel: ' + roomId + ' username: ' + username + ' message: ' + msg);
+		// console.log('Channel: ' + roomId + ' username: ' + username + ' message: ' + msg);
 		io.to(roomId).emit('chat message', username + msg);
 	});
   socket.on('load video', function(id) {
     currentVideoId = id;
-    console.log('current video id', currentVideoId)
+    // console.log('current video id', currentVideoId)
     io.to(roomId).emit('load video', id);
-    console.log('current id', currentVideoId);
+    // console.log('current id', currentVideoId);
   });
 });

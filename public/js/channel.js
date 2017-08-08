@@ -15,6 +15,7 @@ $(document).ready(function() {
 	// 3. This function creates an <iframe> (and YouTube player)
 	//    after the API code downloads.
 	var player;
+	var socketId;
 	window.onYouTubeIframeAPIReady = function() {
 		player = new YT.Player('player', {
 			height: '390',
@@ -48,8 +49,8 @@ $(document).ready(function() {
 		} else {
 			// no match for the category
 		}
+		// socket.emit('new player state');
 	}
-
 	// 5. The API calls this function when the player's state changes.
 	//    The function indicates that when playing a video (state=1),
 	//    the player should play for six seconds and then stop.
@@ -72,6 +73,9 @@ $(document).ready(function() {
 	}
 	function setPlayerState(state,time) {
 		if (state == YT.PlayerState.PLAYING) {
+			console.log('state', state);
+			console.log('time', time);
+			console.log("player time: ", player.getCurrentTime());
 			if (player.getCurrentTime().toPrecision(2) != time.toPrecision(2) && player.getPlayerState() != state) {
 				player.seekTo(time);
 			}
@@ -115,7 +119,6 @@ $(document).ready(function() {
 					error: function(error){
 						console.log('error', error);
 					}
-
 				})
 			}else {
 				$('#messages').append($('<li style="color: red;">').text("invalid url"));
@@ -123,11 +126,34 @@ $(document).ready(function() {
 			}
 		return false;
 		});
-
+		// socket.on('request player state', function(){
+		// 	playerState = player.getPlayerState();
+		// 	playerTime = player.getCurrentTime();
+		// 	socket.emit('respond player state', playerState, playerTime);
+		// });
+		$('#n').blur(
+			function(){
+				// console.log('blur');
+				socket.emit('name change', socketId, $('#n').val());
+			}
+		);
+		socket.emit('user connected');
+		socket.on('new user', function(socket){
+			socketId = socket;
+		});
 		socket.on('chat message', function(msg){
 			var d = new Date();
 			$('#messages').append($('<li>').text('[' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + '] ' + msg));
 			$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
+		});
+		socket.on('update name list', function(clients){
+			nameList = clients;
+			$(".userList").empty();
+			console.log('nameList: ', nameList);
+			// $'(.name').remove();
+			for (name in nameList){
+				$('.userList').append($('<li class="name">').text(nameList[name].name));
+			}
 		});
 		socket.on('set player state', function(state,time){
 			setPlayerState(state,time);
@@ -136,11 +162,6 @@ $(document).ready(function() {
 			player.loadVideoById(id);
 			return false;
 		});
-		// socket.on('connection'), function(){
-		// 	socket.emit('request')
-		// }
-
-
 		function setChannel(channel) {
 			$('#title').text('Channel: '+channel.name);
 			id = channel.current_video

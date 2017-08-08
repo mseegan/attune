@@ -10,7 +10,7 @@ module.exports.controller = function(router, app) {
 
 	router.route('/')
 		.get(function (req, res) {
-			console.log('[log] : GET /lobby');
+			// console.log('[log] : GET /lobby');
 			res.format({
 				html: function() {
 					//res.sendFile(__dirname + '/views/lobby.html');
@@ -24,8 +24,8 @@ module.exports.controller = function(router, app) {
 			});
 		})
 		.post(function(req, res){
-			console.log('[log] : POST /channel');
-			console.log('[log] : Body: '+ req.body.name);
+			// console.log('[log] : POST /channel');
+			// console.log('[log] : Body: '+ req.body.name);
 			var uniq = intformat(generator.next(), 'dec');
 			db.Channel.create({
 				name : req.body.name,
@@ -47,7 +47,7 @@ module.exports.controller = function(router, app) {
 
 		.get(function (req, res) {
 			var uniq = req.params.uniq;
-			console.log('[log] : GET /channel/'+uniq);
+			// console.log('[log] : GET /channel/'+uniq);
 			res.format({
 				html: function() {
 					res.render('channel.hbs');
@@ -69,7 +69,7 @@ module.exports.controller = function(router, app) {
 		})
     .put(function (req,res){
       var uniq = req.params.uniq;
-      console.log('[log] : PUT /channel/'+uniq);
+      // console.log('[log] : PUT /channel/'+uniq);
       res.format({
         json: function() {
           return db.Channel.findOne({uniq:uniq}, function(err, channel){

@@ -14,6 +14,9 @@ $(document).ready(function() {
 	socket.emit('create', roomId);
 	// 3. This function creates an <iframe> (and YouTube player)
 	//    after the API code downloads.
+	var url = document.documentURI;
+	var uniq = "";
+	var matches = url.match(/\/channel\/([^\/]+)/);
 	var player;
 	var socketId;
 	window.onYouTubeIframeAPIReady = function() {
@@ -29,23 +32,21 @@ $(document).ready(function() {
 	}
 	// 4. The API will call this function when the video player is ready.
 	function onPlayerReady(event) {
-		var url = document.documentURI;
-		var uniq = "";
-		var matches = url.match(/\/channel\/([^\/]+)/);
 		if (matches) {
 			uniq = matches[1];    // "whatever"
-			socket.emit('addUser', {
-				user: 'guest',
-				channel_id: uniq
-			});
+			console.log('uniq', uniq);
+			// socket.emit('addUser', {
+			// 	user: 'guest',
+			// 	channel_id: uniq
+			// });
 			$.ajax({
-				url:'/channel/'+uniq,
+				url:'/channel/'+ uniq,
 				contentType: 'application/json',
 				dataType: 'json',
 				success: function(result) {
 					setChannel(result);
 				}
-			})
+			});
 		} else {
 			// no match for the category
 		}
@@ -98,12 +99,12 @@ $(document).ready(function() {
 			}
 		});
 		$('#loadUrl').click (function loadVideo(e) {
-			// console.log("button is pressed");
-			// console.log($('#videoUrl').val());
+			console.log("button is pressed");
+			console.log($('#videoUrl').val());
 			e.preventDefault();
 			var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
 			var match = $('#videoUrl').val().match(regExp);
-			// console.log(match);
+			console.log(match);
 			if (match && match[2].length == 11) {
 				var vidId = match[2];
 				player.loadVideoById(match[2]);
@@ -114,10 +115,10 @@ $(document).ready(function() {
 					dataType: 'json',
 					data: {current_video: match[2]},
 					success: function(result){
-						// console.log('updated current video', result);
+						console.log('updated current video', result);
 					},
 					error: function(error){
-						// console.log('error', error);
+						console.log('error', error);
 					}
 				})
 			}else {

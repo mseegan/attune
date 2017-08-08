@@ -73,18 +73,18 @@ $(document).ready(function() {
 	}
 	function setPlayerState(state,time) {
 		if (state == YT.PlayerState.PLAYING) {
-			console.log('state', state);
-			console.log('time', time);
-			console.log("player time: ", player.getCurrentTime());
+			// console.log('state', state);
+			// console.log('time', time);
+			// console.log("player time: ", player.getCurrentTime());
 			if (player.getCurrentTime().toPrecision(2) != time.toPrecision(2) && player.getPlayerState() != state) {
 				player.seekTo(time);
 			}
 			player.playVideo();
-			console.log("Set Player to playing at: "+time);
+			// console.log("Set Player to playing at: "+time);
 			//console.log(player.getCurrentTime())
 		} else if (state == YT.PlayerState.PAUSED) {
 			player.pauseVideo()
-			console.log("Set Player to paused");
+			// console.log("Set Player to paused");
 		}
 
 	}
@@ -133,12 +133,12 @@ $(document).ready(function() {
 		// });
 		$('#n').blur(
 			function(){
-				// console.log('blur');
+				console.log('blur');
 				socket.emit('name change', socketId, $('#n').val());
 			}
 		);
-		socket.emit('user connected');
 		socket.on('new user', function(socket){
+			console.log('new user session id: ', socket);
 			socketId = socket;
 		});
 		socket.on('chat message', function(msg){
@@ -150,22 +150,34 @@ $(document).ready(function() {
 			nameList = clients;
 			$(".userList").empty();
 			console.log('nameList: ', nameList);
+			// console.log('latest member: ', nameList[nameList.length-1]);
 			// $'(.name').remove();
 			for (name in nameList){
 				$('.userList').append($('<li class="name">').text(nameList[name].name));
 			}
 		});
-		socket.on('set player state', function(state,time){
-			setPlayerState(state,time);
+		socket.on('new player', function(clients, id){
+			if (player.getCurrentTime() != undefined){
+				var playerTime = player.getCurrentTime();
+				var userJoined =clients[clients.length-1].sessionId;
+				console.log("playerTime: ", socketId + ": "+ playerTime);
+				console.log('user joined: ', userJoined);
+				socket.emit('send video data', userJoined, id, playerTime)
+			}
 		});
-		socket.on('load video', function(id){
-			player.loadVideoById(id);
+		socket.on('set player state', function(state,time){
+			setPlayerState(state,time, "large");
+		});
+		socket.on('load video', function(id, time){
+			console.log("id: " + id + " time: " + time);
+			player.loadVideoById(id, time + 1);
 			return false;
 		});
 		function setChannel(channel) {
 			$('#title').text('Channel: '+channel.name);
 			id = channel.current_video
-			player.loadVideoById(id);
+			socket.emit('user connected', id);
+			// player.loadVideoById(id);
 		};
 
 

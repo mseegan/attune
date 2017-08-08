@@ -91,10 +91,11 @@ io.on('connection', function(socket){
     roomId = room;
     socket.join(room);
   });
-  socket.on('user connected', function(){
+  socket.on('user connected', function(id){
     // console.log("ran");
     socket.emit('new user', socket.id);
     io.to(roomId).emit('update name list', clients);
+    io.to(roomId).emit('new player', clients, id);
   });
 	// socket.on('addUser', function(data){ //adds user to channel
 	// 	console.log('Added user to channel: '+data);
@@ -102,20 +103,10 @@ io.on('connection', function(socket){
 	// 	roomId = data;
 	// 	//socket.user = data.user;
 	// });
-
-
-
-  // socket.on('new player state', function(){
-  //   socket.broadcast.to(roomId).emit('chat message', "welcome");
-  //   socket.broadcast.to(roomId).emit('request player state');
-  // });
-  // socket.on('respond player state', function(state, time){
-  //   io.to(roomId).emit('set player state', state, time);
-  // });
-
-
-
-
+  socket.on('send video data', function(user, videoId, playerTime){
+      socket.broadcast.to(user).emit('chat message', "starting video : " + videoId + "at: " + playerTime);
+      socket.broadcast.to(user).emit('load video', videoId, playerTime);
+  });
 
 	socket.on('disconnect', function(){
 		console.log('User disconnected: ', this.id);
@@ -144,7 +135,7 @@ io.on('connection', function(socket){
   socket.on('load video', function(id) {
     currentVideoId = id;
     // console.log('current video id', currentVideoId)
-    io.to(roomId).emit('load video', id);
+    io.to(roomId).emit('load video', id, 0);
     // console.log('current id', currentVideoId);
   });
 });

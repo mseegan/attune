@@ -1,5 +1,5 @@
 $(document).ready(function() {
-	console.log("channel.js is running");
+	// console.log("channel.js is running");
 
 	var socket = io();
 	var roomId = window.location.pathname.split('/')[2];
@@ -59,10 +59,10 @@ $(document).ready(function() {
 		var playerTime = player.getCurrentTime();
 		if (playerState == YT.PlayerState.PLAYING) {
 			socket.emit('set player state', playerState, playerTime);
-			console.log("Player set to playing");
+			// console.log("Player set to playing");
 			//console.log(player.getCurrentTime())vv
 		} else if (playerState == YT.PlayerState.PAUSED) {
-			console.log("Player set to paused");
+			// console.log("Player set to paused");
 			socket.emit('set player state', playerState, playerTime);
 		}
 		/*
@@ -90,7 +90,7 @@ $(document).ready(function() {
 	}
 		// load new video
 		$('#chatForm').submit(function(e){
-			console.log("submit pressed");
+			// console.log("submit pressed");
 			e.preventDefault();
 			if ($('#m').val()){
 				socket.emit('chat message', $('#n').val() + ': ', $('#m').val());
@@ -98,12 +98,12 @@ $(document).ready(function() {
 			}
 		});
 		$('#loadUrl').click (function loadVideo(e) {
-			console.log("button is pressed");
-			console.log($('#videoUrl').val());
+			// console.log("button is pressed");
+			// console.log($('#videoUrl').val());
 			e.preventDefault();
 			var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
 			var match = $('#videoUrl').val().match(regExp);
-			console.log(match);
+			// console.log(match);
 			if (match && match[2].length == 11) {
 				var vidId = match[2];
 				player.loadVideoById(match[2]);
@@ -114,10 +114,10 @@ $(document).ready(function() {
 					dataType: 'json',
 					data: {current_video: match[2]},
 					success: function(result){
-						console.log('updated current video', result);
+						// console.log('updated current video', result);
 					},
 					error: function(error){
-						console.log('error', error);
+						// console.log('error', error);
 					}
 				})
 			}else {
@@ -133,12 +133,12 @@ $(document).ready(function() {
 		// });
 		$('#n').blur(
 			function(){
-				console.log('blur');
+				// console.log('blur');
 				socket.emit('name change', socketId, $('#n').val());
 			}
 		);
 		socket.on('new user', function(socket){
-			console.log('new user session id: ', socket);
+			// console.log('new user session id: ', socket);
 			socketId = socket;
 		});
 		socket.on('chat message', function(msg){
@@ -153,15 +153,17 @@ $(document).ready(function() {
 			// console.log('latest member: ', nameList[nameList.length-1]);
 			// $'(.name').remove();
 			for (name in nameList){
-				$('.userList').append($('<li class="name">').text(nameList[name].name));
+				if (nameList[name].roomId === roomId){
+					$('.userList').append($('<li class="name">').text(nameList[name].name));
+				}
 			}
 		});
 		socket.on('new player', function(clients, id){
 			if (player.getCurrentTime() != undefined){
 				var playerTime = player.getCurrentTime();
 				var userJoined =clients[clients.length-1].sessionId;
-				console.log("playerTime: ", socketId + ": "+ playerTime);
-				console.log('user joined: ', userJoined);
+				// console.log("playerTime: ", socketId + ": "+ playerTime);
+				// console.log('user joined: ', userJoined);
 				socket.emit('send video data', userJoined, id, playerTime)
 			}
 		});
@@ -169,7 +171,7 @@ $(document).ready(function() {
 			setPlayerState(state,time, "large");
 		});
 		socket.on('load video', function(id, time){
-			console.log("id: " + id + " time: " + time);
+			// console.log("id: " + id + " time: " + time);
 			player.loadVideoById(id, time + 1);
 			return false;
 		});
@@ -177,7 +179,7 @@ $(document).ready(function() {
 			$('#title').text('Channel: '+channel.name);
 			id = channel.current_video
 			socket.emit('user connected', id);
-			// player.loadVideoById(id);
+			player.loadVideoById(id);
 		};
 
 

@@ -83,9 +83,6 @@ fs.readdirSync('./controllers').forEach(function (file) {
 //Sockets
 var clients = [];
 io.on('connection', function(socket){
-  clients.push({ 'name': 'Anonymous', 'sessionId': socket.id});
-  console.log("CLIENTS: ", clients);
-	console.log('user connected: ' + socket.id);
 	var roomId;
   socket.on('create', function(room){
     roomId = room;
@@ -93,6 +90,9 @@ io.on('connection', function(socket){
   });
   socket.on('user connected', function(id){
     // console.log("ran");
+    clients.push({ 'name': 'Anonymous', 'sessionId': socket.id, 'roomId': roomId});
+    console.log('user connected: ' + socket.id);
+    console.log("CLIENTS: ", clients);
     socket.emit('new user', socket.id);
     io.to(roomId).emit('update name list', clients);
     io.to(roomId).emit('new player', clients, id);
@@ -104,13 +104,14 @@ io.on('connection', function(socket){
 	// 	//socket.user = data.user;
 	// });
   socket.on('send video data', function(user, videoId, playerTime){
-      socket.broadcast.to(user).emit('chat message', "starting video : " + videoId + "at: " + playerTime);
+      socket.broadcast.to(user).emit('chat message', "starting video at: " + playerTime);
       socket.broadcast.to(user).emit('load video', videoId, playerTime);
   });
 
 	socket.on('disconnect', function(){
 		console.log('User disconnected: ', this.id);
     clients.splice(clients.indexOf(socket), 1);
+    io.to(roomId).emit('update name list', clients);
 	});
   socket.on('name change', function(socketId, newName){
     // console.log('newName: ', newName);

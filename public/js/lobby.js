@@ -1,7 +1,7 @@
 function loadPage() {
 	createChannelFormSetVisibilty('none');
-	updateTable();
 }
+updateTable();
 
 function updateTable() {
 	$.ajax({
@@ -36,7 +36,7 @@ function addRow(tableEl, row) {
 	$(rowEl).on('click', function() {
 		//alert('you clicked ' + row['uniq']);
 		window.open('/channel/'+row.uniq, '_blank');
-		
+
 	});
 }
 function createChannelFormSetVisibilty(visible) {
@@ -57,7 +57,7 @@ function createChannel() {
 		dataType: 'json',
 		data: data,
 		success: function() {
-			
+
 		},
 	});
 	createChannelFormSetVisibilty('none');

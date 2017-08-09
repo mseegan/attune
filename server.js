@@ -104,7 +104,6 @@ io.on('connection', function(socket){
 	// 	//socket.user = data.user;
 	// });
   socket.on('send video data', function(user, videoId, playerTime){
-      socket.broadcast.to(user).emit('chat message', "starting video at: " + playerTime);
       socket.broadcast.to(user).emit('load video', videoId, playerTime);
   });
 

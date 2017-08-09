@@ -6,7 +6,9 @@ var channelSchema = new Schema({
 	owner: String,
 	current_video: String,
 	date: Date,
-	queue: Array,
+	queue: [{
+		videoId: String
+	}],
 	uniq: String
 });
 

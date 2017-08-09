@@ -69,22 +69,73 @@ module.exports.controller = function(router, app) {
 		})
     .put(function (req,res){
       var uniq = req.params.uniq;
+      console.log("req.body", req.body);
       // console.log('[log] : PUT /channel/'+uniq);
-      res.format({
-        json: function() {
-          return db.Channel.findOne({uniq:uniq}, function(err, channel){
-            channel.current_video = req.body.current_video;
-            return channel.save(function(err){
-              if (!err){
-                console.log('updated');
-              }
-              else {
-                console.log('[log] : Error - ',err);
-              }
-              return res.send(channel);
+      if(req.body.current_video){
+        res.format({
+          json: function() {
+            return db.Channel.findOne({uniq:uniq}, function(err, channel){
+              channel.current_video = req.body.current_video;
+              return channel.save(function(err){
+                if (!err){
+                  console.log('updated');
+                }
+                else {
+                  console.log('[log] : Error - ',err);
+                }
+                return res.send(channel);
+              });
             });
-          });
-        }
-      });
+          }
+        });
+      }else if(req.body.videoId){
+        console.log("video ID got!", req.body.videoId);
+        res.format({
+          json: function(){
+            // return db.channel.findOneAndUpdate(
+            //   {uniq:uniq},
+            //   {$push: {queue: req.body.videoId}}
+            // });
+            return db.Channel.findOne({uniq:uniq}, function(err, channel){
+              console.log("id: ", channel._id);
+              console.log("videoId: ", req.body);
+              // channel.update({"_id": channel.id}, {$push: {queue: {videoId: req.body}} }, function(err){
+              //   if (!err){
+              //     console.log("updated queue");
+              //   } else {
+              //     console.log("update queue failed");
+              //   }
+              // });
+              var found = false;
+                for (var i = 0; i < channel.queue.length; i++){
+                  console.log("iteration");
+                  if (channel.queue[i].videoId == req.body.videoId){
+                    found = true;
+                    console.log("found one!");
+                    break;
+                  } else {
+                    console.log("found none!");
+                  }
+                }
+                if(channel.queue.length === 0||found === false){
+                  updateQueue();
+                }
+              function updateQueue(){
+                  newQueue = {videoId: req.body.videoId};
+                  console.log("queue: ", newQueue);
+                  channel.queue.push(newQueue);
+                  console.log("newQueue: ", newQueue);
+                  return channel.save(function(err){
+                    if (!err){
+                      console.log("updated queue!");
+                    }else {
+                      console.log('[log] : Error - ', err);
+                    }
+                  });
+                }
+            });
+          }
+        });
+      }
     });
 }

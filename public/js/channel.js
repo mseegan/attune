@@ -49,7 +49,7 @@ $(document).ready(function() {
 				}
 			});
 			getQueue();
-			setInterval(getQueue(), 5000);
+			// setInterval(getQueue(), 5000);
 		} else {
 			// no match for the category
 		}
@@ -133,11 +133,12 @@ $(document).ready(function() {
 			var match = vidUrl.match(regExp);
 			console.log(match);
 			if (match && match[2].length == 11) {
+				console.log("ran");
 				var vidId = match[2];
 				$.ajax({
 					url:'/channel/'+uniq,
 					type: 'PUT',
-					dataType: 'json',
+					dataType: 'text',
 					data: {videoId: match[2]},
 					success: function(result){
 						console.log('video added to queue', result);
@@ -145,12 +146,13 @@ $(document).ready(function() {
 					error: function(error){
 						console.log('error', error);
 					}
+				}).done(function(){
+					getQueue();
 				});
 			}else {
 				$('#messages').append($('<li style="color: red;">').text("invalid url"));
 				$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
 			}
-			getQueue();
 
 			$('#queueUrl').val('');
 		return false;
@@ -259,8 +261,9 @@ function getQueue(){
 						e["title"] = title;
 						e["thumbnail"] = thumbnail;
 						console.log("e2: ", e);
+					}).done(function(){
 						if (count === result.queue.length){
-							// console.log("queue: ", result.queue);
+							console.log("queue: ", result.queue);
 							socket.emit('queue video', result.queue);
 							renderQueue(result.queue);
 							playlist = result.queue;

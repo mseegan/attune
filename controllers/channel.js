@@ -79,6 +79,7 @@ module.exports.controller = function(router, app) {
               return channel.save(function(err){
                 if (!err){
                   console.log('updated');
+                  res.status(200).send();
                 }
                 else {
                   console.log('[log] : Error - ',err);
@@ -125,9 +126,11 @@ module.exports.controller = function(router, app) {
                   console.log("queue: ", newQueue);
                   channel.queue.push(newQueue);
                   console.log("newQueue: ", newQueue);
+                  console.log("channel: ", channel);
                   return channel.save(function(err){
                     if (!err){
                       console.log("updated queue!");
+                      res.status(200).send();
                     }else {
                       console.log('[log] : Error - ', err);
                     }

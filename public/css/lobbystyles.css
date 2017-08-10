@@ -1,10 +1,18 @@
 title {
 	display: none;
 }
+header{
+	margin-bottom: 10px;
+	padding: 10px;
+	width:100%;
+	background-color: red;
+	color: #e6e6e6;
+	box-shadow: 0px 5px lightgrey;
+}
 .lobby {
 	margin: 10px;
 	padding: 10px;
-	background-color: lightgrey;
+	/*background-color: lightgrey;*/
 }
 .lobbyTable {
 	margin: 5px;
@@ -13,4 +21,15 @@ title {
 .lobbyTable td {
 	margin: 5px;
 	padding: 10px;
+}
+body {
+	font-family: 'Roboto', sans-serif;
+	font-size: 13px;
+	text-shadow: 3px #666666;
+}
+
+button, input[type="button"] {
+	background: lightblue; border: none; padding: 4px;
+	border: 1px;
+	border-color: lightgrey;
 }

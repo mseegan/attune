@@ -58,6 +58,7 @@ app.use(flash());
 app.use('/public', express.static(__dirname + '/public', { maxAge: ONEDAY }));
 
 server.listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
 });
 
 
@@ -76,6 +77,7 @@ fs.readdirSync('./controllers').forEach(function (file) {
 			controller_endpoint = '/'+controller_name;
 			app.use(controller_endpoint, router);
 	  }
+	  console.log('[log] Initialized: '+controller_name+' controller -> Served at: '+controller_endpoint);
   }
 });
 //Sockets
@@ -87,7 +89,10 @@ io.on('connection', function(socket){
     socket.join(room);
   });
   socket.on('user connected', function(id){
+    // console.log("ran");
     clients.push({ 'name': 'Anonymous', 'sessionId': socket.id, 'roomId': roomId});
+    console.log('user connected: ' + socket.id);
+    console.log("CLIENTS: ", clients);
     socket.emit('new user', socket.id);
     io.to(roomId).emit('update name list', clients);
     io.to(roomId).emit('new player', clients, id);
@@ -96,30 +101,42 @@ io.on('connection', function(socket){
       socket.broadcast.to(user).emit('load video', videoId, playerTime);
   });
 	socket.on('disconnect', function(){
+		console.log('User disconnected: ', this.id);
     for (client in clients) {
       if (clients[client].sessionId === this.id){
+        console.log("we have a match!", this.id);
+        console.log("session ID for reference: ", clients[client].sessionId);
         clients.splice(client, 1);
       }
     }
+    console.log('clients', clients);
     io.to(roomId).emit('update name list', clients);
 	});
   socket.on('name change', function(socketId, newName){
+    // console.log('newName: ', newName);
+    // console.log("socketId: ", socketId);
+    // console.log("clients: ", clients);
     for (client in clients) {
       if (socketId == clients[client].sessionId){
         clients[client].name = newName;
+        // console.log("new name: ", clients[client].name);
       }
     }
     io.to(roomId).emit('update name list', clients);
   });
 	socket.on('set player state', function(state, time) {
+		// console.log('Channel: '+socket.channel_id+' set player state: ' + state +' time: '+time);
 		io.to(roomId).emit('set player state', state, time);
 	});
 	socket.on('chat message', function(username, msg){
+		// console.log('Channel: ' + roomId + ' username: ' + username + ' message: ' + msg);
 		io.to(roomId).emit('chat message', username + msg);
 	});
   socket.on('load video', function(id) {
     currentVideoId = id;
+    // console.log('current video id', currentVideoId)
     io.to(roomId).emit('load video', id, 0);
+    // console.log('current id', currentVideoId);
   });
   socket.on('queue video', function(queue){
     socket.broadcast.to(roomId).emit('queue video', queue);

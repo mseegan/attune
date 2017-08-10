@@ -59,6 +59,13 @@ button {
 	border-color: lightgrey;
 }
 
+.hidden{
+	visibility: hidden;
+}
+
+.visible{
+	visibility: visible;
+}
 #messages {
 	margin: 0;
 	padding: 0;

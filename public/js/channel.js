@@ -49,6 +49,7 @@ $(document).ready(function() {
 				}
 			});
 			getQueue();
+			setInterval(getQueue(), 5000);
 		} else {
 			// no match for the category
 		}
@@ -59,7 +60,27 @@ $(document).ready(function() {
 	//    the player should play for six seconds and then stop.
 	function onStateChange(event) {
 		if (event.data === 0){
-			console.log("")
+			socket.emit('load video', playlist[0].videoId);
+			removeQueue();
+		}
+		function removeQueue(){
+			console.log("data: ", playlist[0]);
+			$.ajax({
+				method: 'PUT',
+				url:'/channel/'+uniq+'/queue',
+				dataType: 'text',
+				data: {videoId: playlist[0].videoId},
+				success: function(){
+					console.log("removed");
+					playlist.shift();
+					console.log("playlist: ", playlist);
+					renderQueue(playlist);
+					getQueue();
+				}, error: function(error){
+					console.log("error", error);
+					console.log("playlist: ", playlist);
+				}
+			});
 		}
 		var playerState = event.data;
 		var playerTime = player.getCurrentTime();
@@ -143,18 +164,7 @@ $(document).ready(function() {
 				var vidId = match[2];
 				player.loadVideoById(match[2]);
 				socket.emit('load video', vidId);
-				$.ajax({
-					url:'/channel/'+uniq,
-					type: 'PUT',
-					dataType: 'json',
-					data: {current_video: match[2]},
-					success: function(result){
-						console.log('updated current video', result);
-					},
-					error: function(error){
-						console.log('error', error);
-					}
-				});
+				updateCurrent(match[2]);
 			}else {
 				$('#messages').append($('<li style="color: red;">').text("invalid url"));
 				$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
@@ -205,6 +215,7 @@ $(document).ready(function() {
 		socket.on('load video', function(id, time){
 			// console.log("id: " + id + " time: " + time);
 			player.loadVideoById(id, time + 1);
+			updateCurrent(id);
 			return false;
 		});
 		socket.on('queue video', function(queue){
@@ -251,7 +262,9 @@ function getQueue(){
 						if (count === result.queue.length){
 							// console.log("queue: ", result.queue);
 							socket.emit('queue video', result.queue);
-							renderQueue(result.queue)
+							renderQueue(result.queue);
+							playlist = result.queue;
+							// console.log("playlist: ", playlist)
 						}
 						count++
 					});
@@ -259,6 +272,20 @@ function getQueue(){
 			},
 			error: function(error){
 				console.log("error: ", error);
+			}
+		});
+	}
+	function updateCurrent(id){
+		$.ajax({
+			url:'/channel/'+uniq,
+			type: 'PUT',
+			dataType: 'json',
+			data: {current_video: id},
+			success: function(result){
+				console.log('updated current video', result);
+			},
+			error: function(error){
+				console.log('error', error);
 			}
 		});
 	}

@@ -60,8 +60,11 @@ $(document).ready(function() {
 	//    the player should play for six seconds and then stop.
 	function onStateChange(event) {
 		if (event.data === 0){
-			socket.emit('load video', playlist[0].videoId);
-			removeQueue();
+			if(playlist.length >= 1){
+				socket.emit('load video', playlist[0].videoId);
+				removeQueue();
+			} else {
+			}
 		}
 		function removeQueue(){
 			console.log("data: ", playlist[0]);
@@ -279,6 +282,7 @@ function getQueue(){
 		});
 	}
 	function updateCurrent(id){
+		console.log("id", id);
 		$.ajax({
 			url:'/channel/'+uniq,
 			type: 'PUT',

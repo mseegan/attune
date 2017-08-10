@@ -76,15 +76,14 @@ module.exports.controller = function(router, app) {
           json: function() {
             return db.Channel.findOne({uniq:uniq}, function(err, channel){
               channel.current_video = req.body.current_video;
-              return channel.save(function(err){
+              return channel.save(function(err, saved){
                 if (!err){
                   console.log('updated');
-                  res.status(200).send();
                 }
                 else {
                   console.log('[log] : Error - ',err);
                 }
-                return res.send(channel);
+                res.json(saved);
               });
             });
           }
@@ -171,13 +170,13 @@ module.exports.controller = function(router, app) {
               console.log("req.params.id: ", req.params.id);
               channel.queue[0].remove({_id: req.params.id}, function(err){
                 if (err) {console.log("error - ", err); }
-                return channel.save(function(err){
+                return channel.save(function(err, saved){
                   if (!err){
                     console.log("removed!", channel);
-                    res.status(200).send();
                   }else {
                     console.log('[log] : Error - ', err);
                   }
+                  res.json(saved);
                 });
               })
             }

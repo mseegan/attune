@@ -1,9 +1,11 @@
-function loadPage() {
-	createChannelFormSetVisibilty('none');
-}
+$(document).ready(function() {
+// function loadPage() {
+// 	createChannelFormSetVisibilty('none');
+// }
 updateTable();
 
 function updateTable() {
+	// console.log("updating...");
 	$.ajax({
 		url: "/channel",
 		contentType: 'application/json',
@@ -39,27 +41,35 @@ function addRow(tableEl, row) {
 
 	});
 }
-function createChannelFormSetVisibilty(visible) {
-	$('#createChannelForm').css("display", visible);
-};
-function createChannel() {
-	var newChannel = $('#channelName').val();
-	var data = {
-		name: newChannel,
-		owner: 'guest'
-	};
-	$('#channelName').val('');
-	var data = JSON.stringify(data);
-	$.ajax({
-		url: "/channel",
-		type: "POST",
-		contentType: 'application/json',
-		dataType: 'json',
-		data: data,
-		success: function() {
-
-		},
+// $(.createChannel).click(function(e, visible){
+// 	e.preventDefault();
+// 	$('#createChannelForm').css("display", visible);
+// })
+	$('.create').click(function(e){
+		e.preventDefault();
+		// console.log("clicked!");
+		createChannel();
 	});
-	createChannelFormSetVisibilty('none');
-	updateTable();
-}
+	function createChannel() {
+		var newChannel = $('#channelName').val();
+		var data = {
+			name: newChannel,
+			owner: 'guest'
+		};
+		$('#channelName').val('');
+		var data = JSON.stringify(data);
+		// console.log("data:", data);
+		$.ajax({
+			url: "/channel",
+			type: "POST",
+			contentType: 'application/json',
+			dataType: 'json',
+			data: data,
+			success: function() {
+				// console.log("updating...");
+				updateTable();
+			},
+		});
+		// createChannelFormSetVisibilty('none');
+	}
+});

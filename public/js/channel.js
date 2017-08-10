@@ -49,6 +49,10 @@ $(document).ready(function() {
 				}
 			});
 			getQueue();
+			if(playlist.length === 0){
+				console.log("no videos...");
+				toggleLoad();
+			}
 			// setInterval(getQueue(), 5000);
 		} else {
 			// no match for the category
@@ -184,12 +188,13 @@ $(document).ready(function() {
 		return false;
 		});
 
-		$('#n').blur(
-			function(){
-				// console.log('blur');
+		$('#n').bind('blur keyup', function(e){
+			if (e.type == 'blue' || e.keyCode == '13'){
 				socket.emit('name change', socketId, $('#n').val());
+				$('#n').blur();
+				$('#m').focus();
 			}
-		);
+		});
 		socket.on('new user', function(socket){
 			// console.log('new user session id: ', socket);
 			socketId = socket;
@@ -295,9 +300,11 @@ function getQueue(){
 		if(!$('.loadForm').hasClass('visible')){
 			console.log("changing to visible...");
 			$('.loadForm').removeClass("hidden").addClass("visible");
+			$('.queueForm').removeClass("visible").addClass("hidden");
 		}else {
 			console.log("hiding...");
 			$('.loadForm').removeClass("visible").addClass("hidden");
+			$('.queueForm').removeClass("hidden").addClass("visible");
 		}
 	}
 	function updateCurrent(id){

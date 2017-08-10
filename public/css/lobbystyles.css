@@ -28,8 +28,16 @@ body {
 	text-shadow: 3px #666666;
 }
 
+input[type="text"] {
+
+}
 button, input[type="button"] {
-	background: lightblue; border: none; padding: 4px;
-	border: 1px;
-	border-color: lightgrey;
+	background: lightblue; border: none; padding: 3px;
+	/*border: 1px;*/
+	/*border-color: darkgrey;*/
+}
+.cancel{
+	background-color: white !important;
+	border:1px solid !important;
+	border-color: black !important;
 }

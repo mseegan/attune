@@ -138,4 +138,24 @@ module.exports.controller = function(router, app) {
         });
       }
     });
+	router.route('/:uniq/queue')
+    .get(function (req, res) {
+      var uniq = req.params.uniq;
+      // console.log('[log] : GET /channel/'+uniq);
+      res.format({
+        json: function() {
+          //search for channel
+          db.Channel.findOne({uniq:uniq}, function(err, channel) {
+            console.log("channel: ", channel);
+            if (err) {
+              console.log('[log] : Error - ',err);
+            } else if (channel) {
+              res.json(channel);
+            } else {
+              res.json({ error: 'Not found' });
+            }
+          });
+        }
+      });
+    });
 }

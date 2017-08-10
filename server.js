@@ -97,16 +97,9 @@ io.on('connection', function(socket){
     io.to(roomId).emit('update name list', clients);
     io.to(roomId).emit('new player', clients, id);
   });
-	// socket.on('addUser', function(data){ //adds user to channel
-	// 	console.log('Added user to channel: '+data);
-	// 	socket.join(data);
-	// 	roomId = data;
-	// 	//socket.user = data.user;
-	// });
   socket.on('send video data', function(user, videoId, playerTime){
       socket.broadcast.to(user).emit('load video', videoId, playerTime);
   });
-
 	socket.on('disconnect', function(){
 		console.log('User disconnected: ', this.id);
     for (client in clients) {
@@ -144,5 +137,8 @@ io.on('connection', function(socket){
     // console.log('current video id', currentVideoId)
     io.to(roomId).emit('load video', id, 0);
     // console.log('current id', currentVideoId);
+  });
+  socket.on('queue video', function(queue){
+    socket.broadcast.to(roomId).emit('queue video', queue);
   });
 });

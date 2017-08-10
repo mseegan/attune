@@ -16,22 +16,19 @@
 		<h1 class="channel" id="title"><strong>Channel: {{name}}</strong></h1>
 	</header>
 	<div class="row">
-		<div class="col-md-12">
-			<div class="col-md-6">
-				<div>
-					<div class="col-md-12" id="player"></div>
+		<div class="col-xs-12">
+			<div class="col-xs-6">
+				<div class="col-xs-12 embed-responsive embed-responsive-4by3">
+					<div class="embed-responsive-item" id="player"></div>
 				</div>
-				<div class="row">
-					<form class="col-md-12 urlForm" >
-						<input class="col-md-11" autocomplete="off" id="videoUrl" placeholder="Enter youtube link here..."/><button class="col-md-1" id="loadUrl"><strong>load</strong></button>
+					<form class="col-xs-12 urlForm" >
+						<input class="col-xs-11" autocomplete="off" id="videoUrl" placeholder="Enter youtube link here..."/><button class="col-xs-1" id="loadUrl"><strong>load</strong></button>
 					</form>
-					<form class="col-md-12 urlForm" >
-						<input class="col-md-11" autocomplete="off" id="queueUrl" placeholder="Enter youtube link here..."/><button class="col-md-1" id="queueButton"><strong>load</strong></button>
+					<form class="col-xs-12 urlForm" >
+						<input class="col-xs-11" autocomplete="off" id="queueUrl" placeholder="Enter youtube link here..."/><button class="col-xs-1" id="queueButton"><strong>Queue</strong></button>
 					</form>
-					<ul class="col-md-12 queue"></ul>
-				</div>
 			</div>
-			<div class="col-md-6" >
+			<div class="col-xs-6" >
 				<div class="row">
 					<div class="messageArea">
 						<div class="row">
@@ -43,10 +40,11 @@
 						</div>
 					</div>
 					<div class="row">
-							<form class="col-md-12" id="chatForm" action="">
-								<label class="col-md-12">Name: <input value="Anonymous" id="n" autocomplete="off" maxlength="16"/></label>
-								<input class="col-md-11"type="text" id="m" placeholder="Say something..." autocomplete="off"></input><button class="col-md-1"><strong>Send</strong></button>
+							<form class="col-xs-12" id="chatForm" action="">
+								<label class="col-xs-12">Name: <input value="Anonymous" id="n" autocomplete="off" maxlength="16"/></label>
+								<input class="col-xs-11"type="text" id="m" placeholder="Say something..." autocomplete="off"></input><button class="col-xs-1"><strong>Send</strong></button>
 							</form>
+							<ul class="col-xs-12 queue"></ul>
 						</div>
 					</div>
 				</div>

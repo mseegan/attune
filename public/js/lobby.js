@@ -7,6 +7,7 @@ updateTable();
 var socket = io();
 
 socket.emit('create', 'lobby');
+// socket.emit('stop countdown', "lobby");
 
 socket.on('update', function(){
 	updateTable();

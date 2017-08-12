@@ -12,7 +12,7 @@ $(document).ready(function() {
 	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 	socket.emit('create', roomId);
-	// socket.emit('stop countdown', roomId);
+	socket.emit('stop countdown', roomId);
 	// 3. This function creates an <iframe> (and YouTube player)
 	//    after the API code downloads.
 	var url = document.documentURI;

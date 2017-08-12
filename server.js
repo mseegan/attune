@@ -83,19 +83,20 @@ fs.readdirSync('./controllers').forEach(function (file) {
 //Sockets
 var clients = [];
 var rooms = [];
+var timers = [];
 io.on('connection', function(socket){
 	var roomId;
+  console.log("rooms: ", rooms);
   socket.on('create', function(room){
     roomId = room;
-    rooms.push(room);
     socket.join(room);
-    console.log("room list connection: ", io.sockets.adapter.rooms)
+    // console.log("room list connection: ", io.sockets.adapter.rooms)
   });
   socket.on('user connected', function(id){
     // console.log("ran");
     clients.push({ 'name': 'Anonymous', 'sessionId': socket.id, 'roomId': roomId});
-    console.log('user connected: ' + socket.id);
-    console.log("CLIENTS: ", clients);
+    // console.log('user connected: ' + socket.id);
+    // console.log("CLIENTS: ", clients);
     socket.emit('new user', socket.id);
     io.to(roomId).emit('update name list', clients);
     io.to(roomId).emit('new player', clients, id);
@@ -107,21 +108,20 @@ io.on('connection', function(socket){
 		console.log('User disconnected: ', this.id);
     for (var q=0; q < clients.length; q++){
       if(clients[q].sessionId === this.id){
-        console.log("client to be deleted: ", clients[q]);
+        // console.log("client to be deleted: ", clients[q]);
         clients.splice(q, 1);
       }
     }
-    console.log('clients', clients);
+    // console.log('clients', clients);
     io.to(roomId).emit('update name list', clients);
-    //////////////////////////////////
     var test = io.sockets.adapter.rooms;
-    console.log("test: ", test);
+    // console.log("test: ", test);
     // console.log("length of test: ", test.length);
     var keys = Object.keys(test);
-    console.log("keys: ", keys);
-    console.log("room to be deleted: ", roomId);
+    // console.log("keys: ", keys);
+    // console.log("room to be deleted: ", roomId);
     if (clients.length === 0){
-      console.log("nobody is connected. Deleting room: ", roomId);
+      // console.log("nobody is connected. Deleting room: ", roomId);
       clearRoom();
     } else {
       var usersConnected = 0;
@@ -129,10 +129,10 @@ io.on('connection', function(socket){
         // for(i=0; i < keys.length; i++){
         //   if (keys[i] != clients[j].roomId){
             if (clients[j].roomId != roomId){
-              console.log(clients[j].sessionId, " is not in the room: ", roomId);
-              console.log(clients[j].sessionId, " is in the room: ", clients[j].roomId);
+              // console.log(clients[j].sessionId, " is not in the room: ", roomId);
+              // console.log(clients[j].sessionId, " is in the room: ", clients[j].roomId);
             } else {
-              console.log(clients[j].sessionId, " is in the room: ", clients[j].roomId);
+              // console.log(clients[j].sessionId, " is in the room: ", clients[j].roomId);
               usersConnected++
             }
         //   }
@@ -142,76 +142,52 @@ io.on('connection', function(socket){
       function shouldDelete(num){
         console.log("num: ", num);
         if(num === 0){
-          console.log("room is empty; delete room: ", roomId);
-          clearRoom();
+          // console.log("room is empty; delete room: ", roomId);
+            clearRoom();
         } else{
-          console.log("room has members; don't delete: ", roomId);
+          // console.log("room has members; don't delete: ", roomId);
         }
       }
       var timeout;
       console.log(clients);
     }
     function clearRoom(){
+      if (roomId != "lobby" && roomId != undefined){
+      console.log("roomID", roomId);
       var uniq = roomId;
-      setTimeout(function(){
+      console.log("uniq: ", uniq);
+      rooms.push(roomId);
+      timers.push(setTimeout(function(){
         db.Channel.findOne({uniq:uniq}, function(err, channel){
-          console.log("found it!")
-          console.log("channel: ", channel);
+          // console.log("found it!")
+          // console.log("channel: ", channel);
           channel.remove(function(err, result){
             if(err){ console.log("[log] error - ", err); }
             else{
               console.log("sucessfully removed the channel!");
               socket.to('lobby').emit('update');
+              for(i=0; i<rooms.length; i++){
+                console.log('iteration');
+                if(rooms[i] === uniq){
+                  console.log("matched!");
+                  timers.splice(i, 1);
+                  rooms.splice(i, 1);
+                }
+              }
             }
           });
         });
       }
-      , 5000);
+      , 1000 * 10));
     }
-    // for (i=0; i < keys.length; i++){
-    //   if (keys[i] === roomId){
-    //     console.log("roomiD matches key");
-    //     for (j=0; j < clients.length; j++){
-    //       console.log("roomId: ", roomId);
-    //       console.log("key: ", keys[i]);
-    //       console.log("client room id: ", clients[j].roomId);
-    //       if(clients[j].roomId === keys[i]){
-    //         console.log("client's room matches key");
-    //       } else {
-    //           console.log("client's room does not match key");
-    //       }
-    //     }
-    //   }
-    // }
-    // for (key in keys){
-    //   if (keys[key] === roomId ){
-    //     for (client in clients){
-    //       console.log("roomId: ", roomId);
-    //       console.log("key: ", keys[key]);
-    //       console.log("client room id: ", clients[client].roomId);
-    //
-    //       // console.log("client room: ", clients[client].roomId);
-    //       // console.log("key: ", keys[key]);
-    //       if (clients[client].roomId === roomId){
-    //         if (keys[key] === roomId && clients[client].roomId === roomId){
-    //           console.log("found one!")
-    //         } else {
-    //           console.log("found none!");
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
-    //////////////////////////////
+    console.log("rooms array: ", rooms);
+    console.log("timers array: ", timers);
+    }
 	});
   socket.on('name change', function(socketId, newName){
-    // console.log('newName: ', newName);
-    // console.log("socketId: ", socketId);
-    // console.log("clients: ", clients);
     for (client in clients) {
       if (socketId == clients[client].sessionId){
         clients[client].name = newName;
-        // console.log("new name: ", clients[client].name);
       }
     }
     io.to(roomId).emit('update name list', clients);
@@ -233,6 +209,30 @@ io.on('connection', function(socket){
   socket.on('queue video', function(queue){
     socket.broadcast.to(roomId).emit('queue video', queue);
   });
+  socket.on('stop countdown', function(rid){
+    console.log("roomId: ", roomId);
+    console.log("user connected to: ", rid);
+    if(rid === roomId){
+      console.log("stopping...");
+      for (i=0; i < rooms.length; i ++){
+        if (rid = rooms[i]){
+          console.log("stopping deletion for room :", rooms[i]);
+          stopCountdown(i);
+        }
+      }
+    }
+    // if (roomId === uniq){
+    //   stopCountdown(timeoutID);
+    // }
+    function stopCountdown(timeoutID){
+      console.log("Stopped!");
+      clearTimeout(timers[timeoutID]);
+      timers.splice(timeoutID, 1);
+      rooms.splice(timeoutID, 1);
+      console.log("timers: ", timers);
+      console.log("rooms: ", rooms);
+    }
+  });
 });
 
 
@@ -247,18 +247,5 @@ io.on('connection', function(socket){
 //   if(clients.length === 0){
 //     console.log("the room is completely empty...");
 //     console.log("counting down to deletion of roomId: ", roomId);
-
-//     // function stopCountdown(){
-//     //   console.log("Stopped!");
-//     //     clearTimeout(timeout);
-//     // }
-
-//     // socket.on('stop countdown', function(roomId){
-//     //   console.log("user connected to: ", roomId);
-//     //   console.log("stopping...");
-//     //   if (roomId === uniq){
-//     //     stopCountdown();
-//     //   }
-//     // });
 //   }
 // }

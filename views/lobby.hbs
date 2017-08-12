@@ -22,16 +22,15 @@
 	</div>
 	<div id="createChannelForm" class="lobby col-xs-2">
 		<form>
-			<input placeholder="Channel Name" id="channelName" class="col-xs-9" type="text"	pattern="[a-zA-Z0-9\s]+" name="channelName" required>
+			<input placeholder="Channel Name" id="channelName" class="col-xs-9" type="text" maxlength="30"	pattern="[A-Za-z0-9]+" name="channelName" required>
 			<button type="submit" class="col-xs-3 create" value="Create" >create</button>
 			<!-- <input type="button" class="col-xs-3 cancel" value="Cancel" /> -->
 		</form>
 	</div>
-	<div class="lobby row">
-		<table id="channelsTable" class="lobbyTable col-xs-12" style="width:100%">
+	<div class="lobby">
+		<table id="channelsTable" class="lobbyTable row" style="width:100%">
 			<tr>
-				<th>Channel Name</th>
-				<th>Owner</th>
+				<th>Channel Name</th
 			</tr>
 		</table>
 	</div>

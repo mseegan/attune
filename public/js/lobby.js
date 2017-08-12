@@ -4,6 +4,14 @@ $(document).ready(function() {
 // }
 updateTable();
 
+var socket = io();
+
+socket.emit('create', 'lobby');
+
+socket.on('update', function(){
+	updateTable();
+});
+
 function updateTable() {
 	// console.log("updating...");
 	$.ajax({
@@ -31,10 +39,11 @@ function updateTable() {
 function addRow(tableEl, row) {
 	var rowEl = tableEl.insertRow();
 	rowEl.style = "outline: thin solid black;cursor: pointer;"
+	rowEl.className = "col-xs-12"
 	var nameCell = rowEl.insertCell(0);
-	var nameOwner = rowEl.insertCell(1);
+	nameCell.className = "col-xs-12"
 	nameCell.innerHTML = row.name;
-	nameOwner.innerHTML = row.owner;
+	$('tbody').addClass('col-xs-3');
 	$(rowEl).on('click', function() {
 		//alert('you clicked ' + row['uniq']);
 		window.open('/channel/'+row.uniq, '_blank');
@@ -51,7 +60,8 @@ function addRow(tableEl, row) {
 		createChannel();
 	});
 	function createChannel() {
-		var newChannel = $('#channelName').val();
+
+		var newChannel = $('#channelName').val().replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		var data = {
 			name: newChannel,
 			owner: 'guest'

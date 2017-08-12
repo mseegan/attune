@@ -12,6 +12,7 @@ $(document).ready(function() {
 	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 	socket.emit('create', roomId);
+	// socket.emit('stop countdown', roomId);
 	// 3. This function creates an <iframe> (and YouTube player)
 	//    after the API code downloads.
 	var url = document.documentURI;
@@ -189,7 +190,7 @@ $(document).ready(function() {
 		});
 
 		$('#n').bind('blur keyup', function(e){
-			if (e.type == 'blue' || e.keyCode == '13'){
+			if (e.type == 'blur' || e.keyCode == '13'){
 				socket.emit('name change', socketId, $('#n').val());
 				$('#n').blur();
 				$('#m').focus();

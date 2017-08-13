@@ -48,24 +48,41 @@ module.exports.controller = function(router, app) {
 		.get(function (req, res) {
 			var uniq = req.params.uniq;
 			// console.log('[log] : GET /channel/'+uniq);
-			res.format({
-				html: function() {
-					res.render('channel.hbs');
-				},
-				json: function() {
-					//search for channel
-					db.Channel.findOne({uniq:uniq}, function(err, channel) {
-						//res.json({'channel':channels});
-						if (err) {
-							console.log('[log] : Error - ',err);
-						} else if (channel) {
-							res.json(channel);
-						} else {
-							res.json({ error: 'Not found' });
-						}
-					});
-				}
-			});
+      var channelId;
+      db.Channel.findOne({uniq:uniq}, function(err, channel){
+        console.log("channel", channel);
+        channelId = channel;
+        if (channelId == null || channelId == "undefined"){
+          console.log("channelId", channelId);
+          res.format({
+            html: function(){
+              res.render('404.hbs');
+              // res.sendStatus('404');
+            }
+          });
+        } else {
+          console.log("page exists");
+          res.format({
+            html: function() {
+              res.render('channel.hbs');
+            },
+            json: function() {
+              //search for channel
+              // db.Channel.findOne({uniq:uniq}, function(err, channel) {
+                //res.json({'channel':channels});
+                if (err) {
+                  console.log('[log] : Error - ',err);
+                } else if (channel) {
+                  console.log("channel is: ", channel);
+                  res.json(channel);
+                } else {
+                  res.json({ error: 'Not found' });
+                }
+              // });
+            }
+          });
+        }
+      });
 		})
     .put(function (req,res){
       var uniq = req.params.uniq;
@@ -125,7 +142,7 @@ module.exports.controller = function(router, app) {
                   console.log("queue: ", newQueue);
                   channel.queue.push(newQueue);
                   console.log("newQueue: ", newQueue);
-                  console.log("channel: ", channel);
+                  // console.log("channel: ", channel);
                   return channel.save(function(err){
                     if (!err){
                       console.log("updated queue!");
@@ -148,7 +165,7 @@ module.exports.controller = function(router, app) {
         json: function() {
           //search for channel
           db.Channel.findOne({uniq:uniq}, function(err, channel) {
-            console.log("channel: ", channel);
+            // console.log("channel: ", channel);
             if (err) {
               console.log('[log] : Error - ',err);
             } else if (channel) {

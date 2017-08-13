@@ -50,10 +50,10 @@ $(document).ready(function() {
 				}
 			});
 			getQueue();
-			if(playlist.length === 0){
-				console.log("no videos...");
-				toggleLoad();
-			}
+			// if(playlist.length === 0){
+			// 	console.log("no videos...");
+			// 	toggleLoad();
+			// }
 			// setInterval(getQueue(), 5000);
 		} else {
 			// no match for the category
@@ -132,8 +132,8 @@ $(document).ready(function() {
 			// console.log("submit pressed");
 			e.preventDefault();
 			if ($('#m').val()){
-				socket.emit('chat message', $('#n').val() + ': ', $('#m').val());
-				$('#m').val('');
+					socket.emit('chat message', $('#n').val() + ': ', $('#m').val());
+					$('#m').val('');
 			}
 		});
 		$('#queueButton').click(function(e){
@@ -180,17 +180,17 @@ $(document).ready(function() {
 				socket.emit('load video', vidId);
 				socket.emit('hide load');
 				updateCurrent(match[2]);
+				toggleLoad();
 			}else {
 				$('#messages').append($('<li style="color: red;">').text("invalid url"));
 				$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
 			}
-			toggleLoad();
 			$('#videoUrl').val('');
 		return false;
 		});
 
-		$('#n').bind('blur keyup', function(e){
-			if (e.type == 'blur' || e.keyCode == '13'){
+		$('#n').bind('keyup', function(e){
+			if (e.keyCode == '13'){
 				socket.emit('name change', socketId, $('#n').val());
 				$('#n').blur();
 				$('#m').focus();
@@ -265,31 +265,40 @@ function getQueue(){
 			success: function(result){
 				console.log("got channel: ", result);
 				console.log("got queue: ", result.queue);
+				var state = player.getPlayerState();
+				console.log("playlist: ", playlist);
+				console.log("player state: ", state);
+				if(playlist.length === 0 && state != 0){
+					console.log("no videos...");
+					toggleLoad();
+				}
 				var count = 1;
-				result.queue.forEach(function(e){
-					console.log("e",e);
-					var vidId = e.videoId;
-					var url = 'https://youtube.com/watch?v='+vidId;
-					$.getJSON('https://noembed.com/embed',
-					{format: 'json', url: url}, function (data) {
-						var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-						var match = data.url.match(regExp);
-						var title = data.title;
-						var thumbnail = "https://i.ytimg.com/vi/"+match[2]+"/default.jpg";
-						e["title"] = title;
-						e["thumbnail"] = thumbnail;
-						console.log("e2: ", e);
-					}).done(function(){
-						if (count === result.queue.length){
-							console.log("queue: ", result.queue);
-							socket.emit('queue video', result.queue);
-							renderQueue(result.queue);
-							playlist = result.queue;
-							// console.log("playlist: ", playlist)
-						}
-						count++
+				if (result.queue != undefined){
+					result.queue.forEach(function(e){
+						console.log("e",e);
+						var vidId = e.videoId;
+						var url = 'https://youtube.com/watch?v='+vidId;
+						$.getJSON('https://noembed.com/embed',
+						{format: 'json', url: url}, function (data) {
+							var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+							var match = data.url.match(regExp);
+							var title = data.title;
+							var thumbnail = "https://i.ytimg.com/vi/"+match[2]+"/default.jpg";
+							e["title"] = title;
+							e["thumbnail"] = thumbnail;
+							console.log("e2: ", e);
+						}).done(function(){
+							if (count === result.queue.length){
+								console.log("queue: ", result.queue);
+								socket.emit('queue video', result.queue);
+								renderQueue(result.queue);
+								playlist = result.queue;
+								console.log("playlist: ", playlist)
+							}
+							count++
+						});
 					});
-				});
+				}
 			},
 			error: function(error){
 				console.log("error: ", error);
@@ -298,6 +307,7 @@ function getQueue(){
 	}
 	function toggleLoad(){
 		console.log("toggleLoad");
+		console.log("queue: ", playlist);
 		if(!$('.loadForm').hasClass('visible')){
 			console.log("changing to visible...");
 			$('.loadForm').removeClass("hidden").addClass("visible");

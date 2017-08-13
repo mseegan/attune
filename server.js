@@ -140,7 +140,7 @@ io.on('connection', function(socket){
       }
       shouldDelete(usersConnected);
       function shouldDelete(num){
-        console.log("num: ", num);
+        // console.log("num: ", num);
         if(num === 0){
           // console.log("room is empty; delete room: ", roomId);
             clearRoom();
@@ -149,47 +149,54 @@ io.on('connection', function(socket){
         }
       }
       var timeout;
-      console.log(clients);
+      // console.log(clients);
     }
     function clearRoom(){
       if (roomId != "lobby" && roomId != undefined){
-      console.log("roomID", roomId);
+      // console.log("roomID", roomId);
       var uniq = roomId;
-      console.log("uniq: ", uniq);
+      // console.log("uniq: ", uniq);
       rooms.push(roomId);
       timers.push(setTimeout(function(){
         db.Channel.findOne({uniq:uniq}, function(err, channel){
           // console.log("found it!")
           // console.log("channel: ", channel);
-          channel.remove(function(err, result){
-            if(err){ console.log("[log] error - ", err); }
-            else{
-              console.log("sucessfully removed the channel!");
-              socket.to('lobby').emit('update');
-              for(i=0; i<rooms.length; i++){
-                console.log('iteration');
-                if(rooms[i] === uniq){
-                  console.log("matched!");
-                  timers.splice(i, 1);
-                  rooms.splice(i, 1);
+          if (channel != null){
+            channel.remove(function(err, result){
+              if(err){ console.log("[log] error - ", err); }
+              else{
+                // console.log("sucessfully removed the channel!");
+                socket.to('lobby').emit('update');
+                for(i=0; i<rooms.length; i++){
+                  // console.log('iteration');
+                  if(rooms[i] === uniq){
+                    // console.log("matched!");
+                    timers.splice(i, 1);
+                    rooms.splice(i, 1);
+                  }
                 }
               }
-            }
-          });
+            });
+          }
         });
       }
       , 1000 * 10));
     }
-    console.log("rooms array: ", rooms);
-    console.log("timers array: ", timers);
+    // console.log("rooms array: ", rooms);
+    // console.log("timers array: ", timers);
     }
 	});
   socket.on('name change', function(socketId, newName){
-    for (client in clients) {
-      if (socketId == clients[client].sessionId){
-        clients[client].name = newName;
+    for (i=0; i < clients.length; i++){
+      if (socketId == clients[i].sessionId){
+        clients[i].name = newName;
       }
     }
+    // for (client in clients) {
+    //   if (socketId == clients[client].sessionId){
+    //     clients[client].name = newName;
+    //   }
+    // }
     io.to(roomId).emit('update name list', clients);
   });
 	socket.on('set player state', function(state, time) {
@@ -206,17 +213,20 @@ io.on('connection', function(socket){
     io.to(roomId).emit('load video', id, 0);
     // console.log('current id', currentVideoId);
   });
+  socket.on('hide load', function(){
+    socket.broadcast.to(roomId).emit('hide load');
+  });
   socket.on('queue video', function(queue){
     socket.broadcast.to(roomId).emit('queue video', queue);
   });
   socket.on('stop countdown', function(rid){
-    console.log("roomId: ", roomId);
-    console.log("user connected to: ", rid);
+    // console.log("roomId: ", roomId);
+    // console.log("user connected to: ", rid);
     if(rid === roomId){
-      console.log("stopping...");
+      // console.log("stopping...");
       for (i=0; i < rooms.length; i ++){
         if (rid = rooms[i]){
-          console.log("stopping deletion for room :", rooms[i]);
+          // console.log("stopping deletion for room :", rooms[i]);
           stopCountdown(i);
         }
       }
@@ -225,12 +235,12 @@ io.on('connection', function(socket){
     //   stopCountdown(timeoutID);
     // }
     function stopCountdown(timeoutID){
-      console.log("Stopped!");
+      // console.log("Stopped!");
       clearTimeout(timers[timeoutID]);
       timers.splice(timeoutID, 1);
       rooms.splice(timeoutID, 1);
-      console.log("timers: ", timers);
-      console.log("rooms: ", rooms);
+      // console.log("timers: ", timers);
+      // console.log("rooms: ", rooms);
     }
   });
 });

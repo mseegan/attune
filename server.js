@@ -200,6 +200,12 @@ io.on('connection', function(socket){
     // }
     io.to(roomId).emit('update name list', clients);
   });
+  socket.on('skip expired', function(){
+    io.to(roomId).emit('cancel timer');
+    resetSkip(roomId);
+    io.to(roomId).emit('unhide skip');
+    io.to(roomId).emit('skip message', '[SERVER]: Skip vote Timed out.')
+  });
   socket.on('vote skip', function(uid, time){
     console.log("ran");
     var skipCount = 0;
@@ -224,6 +230,7 @@ io.on('connection', function(socket){
         console.log("skipCount: ", skipCount);
         if (skipCount >= rounded){
           io.to(roomId).emit('skip message', '[SERVER]: Skip vote passes. Skipping...');
+          io.to(roomId).emit('cancel timer');
           io.to(roomId).emit('unhide skip');
           io.to(roomId).emit('skip', time);
           resetSkip(roomId);
@@ -253,6 +260,7 @@ io.on('connection', function(socket){
     currentVideoId = id;
     // console.log('current video id', currentVideoId)
     io.to(roomId).emit('load video', id, 0);
+    io.to(roomId).emit('unhide skip');
     // console.log('current id', currentVideoId);
   });
   socket.on('hide load', function(){

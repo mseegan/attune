@@ -21,6 +21,7 @@ $(document).ready(function() {
 	var player;
 	var socketId;
 	var playlist = [];
+	var timer;
 	window.onYouTubeIframeAPIReady = function() {
 		player = new YT.Player('player', {
 			height: '390',
@@ -153,6 +154,9 @@ $(document).ready(function() {
 			console.log("duration", time);
 			socket.emit('vote skip', socketId, time);
 			$('.skip').addClass('hidden');
+			timer = setTimeout(function(){
+				socket.emit('skip expired');
+			}, 1000 * 30);
 			// socket.emit('skip', time);
 		});
 		//add video to queue
@@ -274,6 +278,11 @@ $(document).ready(function() {
 		socket.on('skip', function(time){
 			console.log("ran");
 			seek(time);
+		});
+		socket.on('cancel timer', function(){
+			if (timer != undefined){
+				clearTimeout(timer);
+			}
 		});
 		socket.on('queue video', function(queue){
 			renderQueue(queue);

@@ -20,7 +20,7 @@ $(document).ready(function() {
 	var matches = url.match(/\/channel\/([^\/]+)/);
 	var player;
 	var socketId;
-	var playList = [];
+	var playlist = [];
 	window.onYouTubeIframeAPIReady = function() {
 		player = new YT.Player('player', {
 			height: '390',
@@ -76,6 +76,7 @@ $(document).ready(function() {
 			}
 		}
 		function removeQueue(){
+			console.log("removing first item in queue");
 			console.log("data: ", playlist[0]);
 			$.ajax({
 				method: 'PUT',
@@ -85,6 +86,7 @@ $(document).ready(function() {
 				success: function(){
 					console.log("removed");
 					playlist.shift();
+					socket.emit('remove');
 					console.log("playlist: ", playlist);
 					renderQueue(playlist);
 					getQueue();
@@ -127,7 +129,15 @@ $(document).ready(function() {
 		}
 
 	}
-		// load new video
+	//chat name change
+	$('#n').bind('keyup', function(e){
+		if (e.keyCode == '13'){
+			socket.emit('name change', socketId, $('#n').val());
+			$('#n').blur();
+			$('#m').focus();
+		}
+	});
+	//chat
 		$('#chatForm').submit(function(e){
 			// console.log("submit pressed");
 			e.preventDefault();
@@ -136,6 +146,10 @@ $(document).ready(function() {
 					$('#m').val('');
 			}
 		});
+		$('.skip').click(function(){
+			console.log("playlist:", playlist);
+		});
+		//add video to queue
 		$('#queueButton').click(function(e){
 			e.preventDefault();
 			var vidUrl = $('#queueUrl').val();
@@ -169,6 +183,7 @@ $(document).ready(function() {
 			$('#queueUrl').val('');
 		return false;
 		});
+		// load new video
 		$('#loadUrl').click (function loadVideo(e) {
 			e.preventDefault();
 			var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -189,13 +204,6 @@ $(document).ready(function() {
 		return false;
 		});
 
-		$('#n').bind('keyup', function(e){
-			if (e.keyCode == '13'){
-				socket.emit('name change', socketId, $('#n').val());
-				$('#n').blur();
-				$('#m').focus();
-			}
-		});
 		socket.on('new user', function(socket){
 			// console.log('new user session id: ', socket);
 			socketId = socket;
@@ -232,6 +240,11 @@ $(document).ready(function() {
 		socket.on('set player state', function(state,time){
 			setPlayerState(state,time, "large");
 		});
+		socket.on('remove', function(){
+			playlist.shift();
+			console.log("shift...");
+			renderQueue();
+		});
 		socket.on('load video', function(id, time){
 			// console.log("id: " + id + " time: " + time);
 			player.loadVideoById(id, time + 1);
@@ -241,10 +254,12 @@ $(document).ready(function() {
 		socket.on('queue video', function(queue){
 			renderQueue(queue);
 			console.log("queue", queue);
+			// getQueue();
 		});
-		var playlist =[];
+		// var playlist =[];
 		function renderQueue(queue){
 			$('.queueRender').remove();
+			toggleLoad();
 			console.log("queue: ", queue);
 					queue.forEach(function(el){
 						$('.queue').append($('<li class="queueRender">').text(el.title));
@@ -308,11 +323,11 @@ function getQueue(){
 	function toggleLoad(){
 		console.log("toggleLoad");
 		console.log("queue: ", playlist);
-		if(!$('.loadForm').hasClass('visible')){
+		if(!$('.loadForm').hasClass('visible') && playlist.length == 0){
 			console.log("changing to visible...");
 			$('.loadForm').removeClass("hidden").addClass("visible");
 			$('.queueForm').removeClass("visible").addClass("hidden");
-		}else {
+		}else if ( $('.loadForm').hasClass('visible')){
 			console.log("hiding...");
 			$('.loadForm').removeClass("visible").addClass("hidden");
 			$('.queueForm').removeClass("hidden").addClass("visible");
@@ -325,6 +340,7 @@ function getQueue(){
 			dataType: 'text',
 			data: {current_video: id},
 			success: function(result){
+				getQueue();
 				console.log('updated current video', result);
 			},
 			error: function(error){

@@ -217,7 +217,10 @@ io.on('connection', function(socket){
     socket.broadcast.to(roomId).emit('hide load');
   });
   socket.on('queue video', function(queue){
-    socket.broadcast.to(roomId).emit('queue video', queue);
+    io.to(roomId).emit('queue video', queue);
+  });
+  socket.on('remove', function(){
+    socket.broadcast.to(roomId).emit('remove');
   });
   socket.on('stop countdown', function(rid){
     // console.log("roomId: ", roomId);

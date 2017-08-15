@@ -179,13 +179,16 @@ module.exports.controller = function(router, app) {
     })
     .put(function(req, res){
       var uniq = req.params.uniq;
+      console.log("req.body.videoId: ", req.body.videoId);
       res.format({
         json: function(){
           db.Channel.findOne({uniq: uniq}, function(err, channel) {
-            if(channel.queue[0].videoId === req.body.videoId){
+            if (channel.queue[0] == undefined || channel.queue[0] == null){
+              console.log("undefined or null");
+            }else if(channel.queue[0].videoId === req.body.videoId){
               console.log("to be removed: ", channel.queue[0]);
-              console.log("req.params.id: ", req.params.id);
-              channel.queue[0].remove({_id: req.params.id}, function(err){
+              console.log("uniq: ", uniq);
+              channel.queue[0].remove({_id: uniq}, function(err){
                 if (err) {console.log("error - ", err); }
                 return channel.save(function(err, saved){
                   if (!err){

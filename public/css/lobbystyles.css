@@ -1,13 +1,13 @@
 title {
 	display: none;
 }
-header{
+.channel{
 	margin-bottom: 10px;
 	padding: 10px;
 	width:100%;
 	background-color: red;
-	color: #e6e6e6;
-	box-shadow: 0px 5px lightgrey;
+	/*color: #e6e6e6;*/
+	box-shadow: 0px 5px 5px 0px #b5b5b5;
 }
 .lobby {
 	margin: 10px;
@@ -27,7 +27,9 @@ body {
 	font-size: 13px;
 	text-shadow: 3px #666666;
 }
-
+.left{
+	float: left;
+}
 input[type="text"] {
 
 }

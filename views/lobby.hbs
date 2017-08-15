@@ -10,27 +10,30 @@
 	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 </head>
 <body>
-	<header class="row">
-		<div class="col-xs-12">
-			<h1>Attune Lobby</h1>
-		</div>
+	<header>
+			<h1 class="channel" id="title"><strong>Attune Lobby</strong></h1>
 	</header>
 	<div class="row">
 		<!-- <div class="lobby">
 			<button class="create" onclick="createChannelFormSetVisibilty('block')">Create Channel</button>
 		</div> -->
 	</div>
-	<div id="createChannelForm" class="lobby col-xs-2">
-		<form>
-			<input placeholder="Channel Name" id="channelName" class="col-xs-9" type="text" maxlength="30"	pattern="[A-Za-z0-9]+" name="channelName" required>
-			<button type="submit" class="col-xs-3 create" value="Create" >create</button>
+		<form class ="row">
+			<div id="createChannelForm" class="lobby col-xs-6">
+				<div class="left">
+					<input placeholder="Channel Name" id="channelName" type="text" maxlength="30"	pattern="[A-Za-z0-9]+" name="channelName" required>
+				</div>
+				<div class="left">
+					<button type="submit" class="create" value="Create" ><strong>create</strong></button>
+				</div>
+			</div>
 			<!-- <input type="button" class="col-xs-3 cancel" value="Cancel" /> -->
 		</form>
 	</div>
 	<div class="lobby">
 		<table id="channelsTable" class="lobbyTable row" style="width:100%">
 			<tr>
-				<th>Channel Name</th
+				<th><strong>Channel Name</strong></th
 			</tr>
 		</table>
 	</div>

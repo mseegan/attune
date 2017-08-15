@@ -146,8 +146,14 @@ $(document).ready(function() {
 					$('#m').val('');
 			}
 		});
+		var time = 0;
 		$('.skip').click(function(){
-			console.log("playlist:", playlist);
+			// console.log("playlist:", playlist);
+			time = player.getDuration();
+			console.log("duration", time);
+			socket.emit('vote skip', socketId, time);
+			$('.skip').addClass('hidden');
+			// socket.emit('skip', time);
 		});
 		//add video to queue
 		$('#queueButton').click(function(e){
@@ -247,16 +253,40 @@ $(document).ready(function() {
 		});
 		socket.on('load video', function(id, time){
 			// console.log("id: " + id + " time: " + time);
-			player.loadVideoById(id, time + 1);
+			player.loadVideoById(id, time);
 			updateCurrent(id);
 			return false;
+		});
+		socket.on('vote skip', function(){
+			console.log("skip vote...");
+			// socket.emit('skip', time);
+		});
+		socket.on('skip message', function(msg){
+			console.log("skip message...");
+			$('#messages').append($('<li style="color: red;">').text(msg));
+			$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
+		});
+		socket.on('unhide skip', function(){
+			if ($('.skip').hasClass('hidden')){
+				$('.skip').removeClass('hidden');
+			}
+		});
+		socket.on('skip', function(time){
+			console.log("ran");
+			seek(time);
 		});
 		socket.on('queue video', function(queue){
 			renderQueue(queue);
 			console.log("queue", queue);
 			// getQueue();
 		});
-		// var playlist =[];
+
+		function seek(time){
+			console.log("ran");
+			if (player != undefined){
+				player.seekTo(time);
+			}
+		}
 		function renderQueue(queue){
 			$('.queueRender').remove();
 			toggleLoad();

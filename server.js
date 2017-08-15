@@ -156,6 +156,7 @@ io.on('connection', function(socket){
       // console.log("roomID", roomId);
       var uniq = roomId;
       // console.log("uniq: ", uniq);
+      console.log("counting down to deletion of channel: ", uniq);
       rooms.push(roomId);
       timers.push(setTimeout(function(){
         db.Channel.findOne({uniq:uniq}, function(err, channel){
@@ -165,7 +166,7 @@ io.on('connection', function(socket){
             channel.remove(function(err, result){
               if(err){ console.log("[log] error - ", err); }
               else{
-                // console.log("sucessfully removed the channel!");
+                console.log("sucessfully removed the channel!");
                 socket.to('lobby').emit('update');
                 for(i=0; i<rooms.length; i++){
                   // console.log('iteration');
@@ -199,6 +200,47 @@ io.on('connection', function(socket){
     // }
     io.to(roomId).emit('update name list', clients);
   });
+  socket.on('vote skip', function(uid, time){
+    console.log("ran");
+    var skipCount = 0;
+    var total = 0;
+    for (i=0; i<clients.length; i++){
+      console.log('sessionId');
+      console.log("uid: ", uid);
+      if(clients[i].sessionId == uid){
+        clients[i].skip = true;
+        socket.emit('vote skip', function(){
+          console.log ("skip value for user", clients[i]);
+        });
+        for (i=0; i< clients.length; i++){
+          if(clients[i].roomId == roomId){
+            total ++
+            if(clients[i].skip == true){
+              skipCount++
+            }
+          }
+        }
+        rounded = Math.ceil(total/2);
+        console.log("skipCount: ", skipCount);
+        if (skipCount >= rounded){
+          io.to(roomId).emit('skip message', '[SERVER]: Skip vote passes. Skipping...');
+          io.to(roomId).emit('unhide skip');
+          io.to(roomId).emit('skip', time);
+          resetSkip(roomId);
+        } else if (skipCount < rounded){
+          io.to(roomId).emit('skip message', '[SERVER]: Skip vote initiated. ' + skipCount +' out of '+ rounded + ' required votes to pass.');
+        }
+      }
+    }
+  });
+  function resetSkip(id){
+    for (i=0; i< clients.length; i++){
+      if(clients[i].skip == true){
+        clients[i].skip = false;
+      }
+    }
+    console.log("clients after reset: ", clients);
+  }
 	socket.on('set player state', function(state, time) {
 		// console.log('Channel: '+socket.channel_id+' set player state: ' + state +' time: '+time);
 		io.to(roomId).emit('set player state', state, time);
@@ -219,6 +261,10 @@ io.on('connection', function(socket){
   socket.on('queue video', function(queue){
     io.to(roomId).emit('queue video', queue);
   });
+  socket.on('skip', function(time){
+    console.log('skipping...');
+    io.to(roomId).emit('skip', time);
+  });
   socket.on('remove', function(){
     socket.broadcast.to(roomId).emit('remove');
   });
@@ -238,7 +284,7 @@ io.on('connection', function(socket){
     //   stopCountdown(timeoutID);
     // }
     function stopCountdown(timeoutID){
-      // console.log("Stopped!");
+      console.log("Stopped countdown for:", roomId);
       clearTimeout(timers[timeoutID]);
       timers.splice(timeoutID, 1);
       rooms.splice(timeoutID, 1);

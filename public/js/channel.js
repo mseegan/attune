@@ -26,15 +26,42 @@ $(document).ready(function() {
 	var countseconds;
 	var cts;
 	window.onYouTubeIframeAPIReady = function() {
-		player = new YT.Player('player', {
-			height: '390',
-			width: '640',
-			// videoId: 'yecrOqC77jY',
-			events: {
-				'onReady': onPlayerReady,
-				'onStateChange': onStateChange
-			}
-		});
+		if (matches) {
+			uniq = matches[1];    // "whatever"
+			console.log('uniq', uniq);
+			$.ajax({
+				url:'/channel/'+ uniq,
+				contentType: 'application/json',
+				dataType: 'json',
+				success: function(result) {
+					disableControl = result.controls;
+					console.log("result", result.controls);
+					console.log("disbaleControl: ", disableControl);
+					if (disableControl == "true"){
+						console.log("disabled player");
+						player = new YT.Player('player', {
+							height: '390',
+							width: '640',
+							playerVars: {'controls': 0, 'disablekb': 1},
+							events: {
+								'onReady': onPlayerReady,
+								'onStateChange': onStateChange
+							}
+						});
+					} else {
+						console.log("enabled player");
+						player = new YT.Player('player', {
+							height: '390',
+							width: '640',
+							events: {
+								'onReady': onPlayerReady,
+								'onStateChange': onStateChange
+							}
+						});
+					}
+				}
+			});
+		}
 	}
 	// 4. The API will call this function when the video player is ready.
 	function onPlayerReady(event) {
@@ -75,12 +102,14 @@ $(document).ready(function() {
 				console.log("playlist has a video");
 				var current = player.getVideoData()['video_id'];
 				console.log("current: ", current);
+				console.log("disableControl", disableControl);
 				if (disableControl == "false"){
 					console.log("next video in queue...");
 					socket.emit('load video', playlist[0].videoId);
 					removeQueue();
 				} if (disableControl == "true"){
-					socket.emit('check video', playlist[0], socketId);
+					console.log("controls are disabled...")
+					socket.emit('check video', current, socketId);
 					// removeQueue();
 				}
 			} else {
@@ -334,16 +363,14 @@ $(document).ready(function() {
 		});
 		socket.on('video compare', function(vidid){
 			var myvid = player.getVideoData()['video_id'];
-			if (vidid == vidid){
+			if (vidid == "match"){
 				console.log("next video...");
 				socket.emit('load video', playlist[0].videoId);
 				removeQueue();
 			} else {
 				console.log("hey its the same video...", vidid);
-				player.loadVideoById(myvid, 0);
-				setTimeout(function(){
-					player.seekTo(countseconds)
-				}, 2000);
+				setPlayerState(YT.PlayerState.PLAYING,countseconds, "large");
+				// seekTo(countseconds);
 			}
 		});
 		function seek(time){
@@ -368,7 +395,7 @@ $(document).ready(function() {
 			id = channel.current_video
 			socket.emit('user connected', id);
 			player.loadVideoById(id);
-			disableControl = channel.controls;
+			// disableControl = channel.controls;
 			if(disableControl == "true"){
 				console.log("run countingTheSeconds");
 				countingTheSeconds();

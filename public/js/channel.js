@@ -53,7 +53,9 @@ $(document).ready(function() {
 				}
 			});
 			getQueue();
-			countingTheSeconds();
+			if(disableControl == "true"){
+				countingTheSeconds();
+			}
 			// if(playlist.length === 0){
 			// 	console.log("no videos...");
 			// 	toggleLoad();
@@ -73,6 +75,9 @@ $(document).ready(function() {
 			console.log("video is stopped", playlist);
 			if(playlist.length >= 1){
 				console.log("playlist has a video");
+				var current = player.getVideoData()['video_id'];
+				console.log("current: ", current);
+				socket.emit('check video', current);
 				socket.emit('load video', playlist[0].videoId);
 				removeQueue();
 			} else {
@@ -287,7 +292,7 @@ $(document).ready(function() {
 		socket.on('load video', function(id, time){
 			// console.log("id: " + id + " time: " + time);
 			player.loadVideoById(id, time);
-			if(disableControl = "true"){
+			if(disableControl == "true"){
 				countseconds = time;
 			}
 			updateCurrent(id);

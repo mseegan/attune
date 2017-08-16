@@ -248,6 +248,16 @@ io.on('connection', function(socket){
     }
     console.log("clients after reset: ", clients);
   }
+  socket.on('check video', function(vidid, id){
+    socket.broadcast.to(roomId).emit('check video',vidid, id);
+  });
+  socket.on('video compare', function(vidid, uid){
+    if (vidid == 'match'){
+      socket.broadcast.to(uid).emit('video compare', "match");
+    } else {
+      socket.broadcast.to(uid).emit('video compare', vidid);
+    }
+  });
 	socket.on('set player state', function(state, time) {
 		// console.log('Channel: '+socket.channel_id+' set player state: ' + state +' time: '+time);
 		io.to(roomId).emit('set player state', state, time);

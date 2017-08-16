@@ -53,9 +53,6 @@ $(document).ready(function() {
 				}
 			});
 			getQueue();
-			if(disableControl == "true"){
-				countingTheSeconds();
-			}
 			// if(playlist.length === 0){
 			// 	console.log("no videos...");
 			// 	toggleLoad();
@@ -77,33 +74,17 @@ $(document).ready(function() {
 				console.log("playlist has a video");
 				var current = player.getVideoData()['video_id'];
 				console.log("current: ", current);
-				socket.emit('check video', current);
-				socket.emit('load video', playlist[0].videoId);
-				removeQueue();
+				if (disableControl == "false"){
+					console.log("next video in queue...");
+					socket.emit('load video', playlist[0].videoId);
+					removeQueue();
+				} if (disableControl == "true"){
+					socket.emit('check video', current, socketId);
+					removeQueue();
+				}
 			} else {
 				toggleLoad();
 			}
-		}
-		function removeQueue(){
-			console.log("removing first item in queue");
-			console.log("data: ", playlist[0]);
-			$.ajax({
-				method: 'PUT',
-				url:'/channel/'+uniq+'/queue',
-				dataType: 'text',
-				data: {videoId: playlist[0].videoId},
-				success: function(){
-					console.log("removed");
-					playlist.shift();
-					socket.emit('remove');
-					console.log("playlist: ", playlist);
-					renderQueue(playlist);
-					getQueue();
-				}, error: function(error){
-					console.log("error", error);
-					console.log("playlist: ", playlist);
-				}
-			});
 		}
 		var playerState = event.data;
 		var playerTime = player.getCurrentTime();
@@ -294,13 +275,18 @@ $(document).ready(function() {
 			player.loadVideoById(id, time);
 			if(disableControl == "true"){
 				countseconds = time;
+			}else {
+				updateCurrent(id);
 			}
-			updateCurrent(id);
 			return false;
 		});
 		socket.on('vote skip', function(){
 			console.log("skip vote...");
-			// socket.emit('skip', time);
+			if (disableControl == "false"){
+				socket.emit('skip', time);
+			} else {
+				socket.emit('skip', countseconds);
+			}
 		});
 		socket.on('skip message', function(msg){
 			console.log("skip message...");
@@ -315,6 +301,9 @@ $(document).ready(function() {
 		socket.on('skip', function(time){
 			console.log("ran");
 			seek(time);
+			if (disableControl == "true"){
+				countseconds = time;
+			}
 		});
 		socket.on('cancel timer', function(){
 			if (timer != undefined){
@@ -326,7 +315,29 @@ $(document).ready(function() {
 			console.log("queue", queue);
 			// getQueue();
 		});
-
+		socket.on('check video', function(vidid, uid){
+			console.log("checking...");
+			var myvid = player.getVideoData()['video_id'];
+			if (vidid == myvid){
+				socket.emit('video compare', "match", uid);
+			} else {
+				socket.emit('video compare', vidid, uid);
+			}
+		});
+		socket.on('video compare', function(vidid){
+			var myvid = player.getVideoData()['video_id'];
+			if (vidid != "match"){
+				console.log("next video...");
+				socket.emit('load video', playlist[0].videoId);
+				removeQueue();
+			} else {
+				console.log("hey its the same video...", vidid);
+				player.loadVideoById(myvid, 0);
+				setTimeout(function(){
+					player.seekTo(countseconds)
+				}, 2000);
+			}
+		});
 		function seek(time){
 			console.log("ran");
 			if (player != undefined){
@@ -350,6 +361,10 @@ $(document).ready(function() {
 			socket.emit('user connected', id);
 			player.loadVideoById(id);
 			disableControl = channel.controls;
+			if(disableControl == "true"){
+				console.log("run countingTheSeconds");
+				countingTheSeconds();
+			}
 		};
 function getQueue(){
 		$.ajax({
@@ -429,6 +444,27 @@ function getQueue(){
 	}
 	function resetCounter(){
 		countseconds = 0;
+	}
+	function removeQueue(){
+		console.log("removing first item in queue");
+		console.log("data: ", playlist[0]);
+		$.ajax({
+			method: 'PUT',
+			url:'/channel/'+uniq+'/queue',
+			dataType: 'text',
+			data: {videoId: playlist[0].videoId},
+			success: function(){
+				console.log("removed");
+				playlist.shift();
+				socket.emit('remove');
+				console.log("playlist: ", playlist);
+				renderQueue(playlist);
+				getQueue();
+			}, error: function(error){
+				console.log("error", error);
+				console.log("playlist: ", playlist);
+			}
+		});
 	}
 
 });

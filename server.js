@@ -215,7 +215,9 @@ io.on('connection', function(socket){
       console.log("uid: ", uid);
       if(clients[i].sessionId == uid){
         clients[i].skip = true;
-        console.log ("skip value for user", clients[i]);
+        socket.emit('vote skip', function(){
+          console.log ("skip value for user", clients[i]);
+        });
         for (i=0; i< clients.length; i++){
           if(clients[i].roomId == roomId){
             total ++

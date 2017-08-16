@@ -228,6 +228,7 @@ io.on('connection', function(socket){
         }
         rounded = Math.ceil(total/2);
         console.log("skipCount: ", skipCount);
+        console.log("rounded: ", rounded);
         if (skipCount >= rounded){
           io.to(roomId).emit('skip message', '[SERVER]: Skip vote passes. Skipping...');
           io.to(roomId).emit('cancel timer');
@@ -235,7 +236,7 @@ io.on('connection', function(socket){
           io.to(roomId).emit('skip', time);
           resetSkip(roomId);
         } else if (skipCount < rounded){
-          io.to(roomId).emit('skip message', '[SERVER]: Skip vote initiated. ' + skipCount +' out of '+ rounded + ' required votes to pass.');
+          io.to(roomId).emit('skip message', '[SERVER]: ' + skipCount +' out of '+ rounded + ' required votes to skip current video.');
         }
       }
     }
@@ -249,7 +250,21 @@ io.on('connection', function(socket){
     console.log("clients after reset: ", clients);
   }
   socket.on('check video', function(vidid, id){
-    socket.broadcast.to(roomId).emit('check video',vidid, id);
+    counter = 0;
+    for (i=0; i<clients.length; i++){
+      console.log("iteration");
+      if (clients[i].roomId == roomId){
+        counter++
+        console.log("got one!")
+      }
+        if (counter > 1){
+          console.log("counter > 1");
+          socket.broadcast.to(roomId).emit('check video',vidid, id);
+        } else {
+        console.log("just me");
+        socket.emit('video compare', 'match');
+      }
+    }
   });
   socket.on('video compare', function(vidid, uid){
     if (vidid == 'match'){

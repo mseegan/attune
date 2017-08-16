@@ -312,7 +312,7 @@ $(document).ready(function() {
 		socket.on('vote skip', function(){
 			console.log("skip vote...");
 			// if (disableControl == "false"){
-				socket.emit('skip', time);
+				// socket.emit('skip', time);
 			// } else {
 			// 	socket.emit('skip', countseconds);
 			// }

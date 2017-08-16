@@ -280,7 +280,7 @@ $(document).ready(function() {
 			}
 			return false;
 		});
-		socket.on('vote skip', function(){
+		socket.on('vote skip', function(time){
 			console.log("skip vote...");
 			if (disableControl == "false"){
 				socket.emit('skip', time);

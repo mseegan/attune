@@ -9,7 +9,8 @@ var channelSchema = new Schema({
 	queue: [{
 		videoId: String
 	}],
-	uniq: String
+	uniq: String,
+	controls: String
 });
 
 var Channel = mongoose.model('Channel', channelSchema);

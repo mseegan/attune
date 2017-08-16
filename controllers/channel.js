@@ -25,7 +25,7 @@ module.exports.controller = function(router, app) {
 		})
 		.post(function(req, res){
 			// console.log('[log] : POST /channel');
-			// console.log('[log] : Body: '+ req.body.name);
+			console.log('[log] : Body: '+ req.body.controls);
 			var uniq = intformat(generator.next(), 'dec');
 			db.Channel.create({
 				name : req.body.name,
@@ -33,6 +33,7 @@ module.exports.controller = function(router, app) {
         current_video: '',
 				date : Date.now(),
         queue: [],
+        controls: req.body.controls,
 				uniq : uniq,
 			}, function(err, channel) {
 				if (err) {

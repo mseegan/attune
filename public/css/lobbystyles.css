@@ -6,9 +6,14 @@ title {
 	padding: 10px;
 	width:100%;
 	background-color: red;
-	/*color: #e6e6e6;*/
+	color: #e6e6e6;
 	box-shadow: 0px 5px 5px 0px #b5b5b5;
 }
+
+h3, h2 {
+    text-align: center;
+}
+
 .lobby {
 	margin: 10px;
 	padding: 10px;

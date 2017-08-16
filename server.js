@@ -279,15 +279,15 @@ io.on('connection', function(socket){
   socket.on('stop countdown', function(rid){
     // console.log("roomId: ", roomId);
     // console.log("user connected to: ", rid);
-    if(rid === roomId){
+    // if(rid === roomId){
       // console.log("stopping...");
       for (i=0; i < rooms.length; i ++){
-        if (rid = rooms[i]){
+        if (rid == rooms[i]){
           // console.log("stopping deletion for room :", rooms[i]);
           stopCountdown(i);
         }
       }
-    }
+    // }
     // if (roomId === uniq){
     //   stopCountdown(timeoutID);
     // }

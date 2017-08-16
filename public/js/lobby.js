@@ -61,15 +61,18 @@ function addRow(tableEl, row) {
 		createChannel();
 	});
 	function createChannel() {
-
+		console.log("check value", $('#checkBox').is(":checked"));
+		var check = $('#checkBox').is(":checked").toString();
+		console.log("checked: ", check);
 		var newChannel = $('#channelName').val().replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		var data = {
 			name: newChannel,
-			owner: 'guest'
+			owner: 'guest',
+			controls: check
 		};
 		$('#channelName').val('');
 		var data = JSON.stringify(data);
-		// console.log("data:", data);
+		console.log("data:", data);
 		$.ajax({
 			url: "/channel",
 			type: "POST",

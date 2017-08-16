@@ -22,6 +22,8 @@ $(document).ready(function() {
 	var socketId;
 	var playlist = [];
 	var timer;
+	var disableControl = "false";
+	var countseconds;
 	window.onYouTubeIframeAPIReady = function() {
 		player = new YT.Player('player', {
 			height: '390',
@@ -51,6 +53,7 @@ $(document).ready(function() {
 				}
 			});
 			getQueue();
+			countingTheSeconds();
 			// if(playlist.length === 0){
 			// 	console.log("no videos...");
 			// 	toggleLoad();
@@ -99,19 +102,45 @@ $(document).ready(function() {
 		}
 		var playerState = event.data;
 		var playerTime = player.getCurrentTime();
-		if (playerState == YT.PlayerState.PLAYING) {
-			socket.emit('set player state', playerState, playerTime);
-			// console.log("Player set to playing");
-			//console.log(player.getCurrentTime())vv
-		} else if (playerState == YT.PlayerState.PAUSED) {
-			// console.log("Player set to paused");
-			socket.emit('set player state', playerState, playerTime);
+		if(disableControl == "false"){
+			console.log("controls enabled...");
+			if (playerState == YT.PlayerState.PLAYING) {
+				socket.emit('set player state', playerState, playerTime);
+				// console.log("Player set to playing");
+				//console.log(player.getCurrentTime())vv
+			} else if (playerState == YT.PlayerState.PAUSED) {
+				// console.log("Player set to paused");
+				socket.emit('set player state', playerState, playerTime);
+			}
+		} else if (disableControl == "true"){
+			console.log("controls disabled...");
 		}
-		/*
+		/*0
 		if (player.getPlayerState() === 1) {
 			console.log(player.getCurrentTime())
 		}
 		*/
+	}
+	function countingTheSeconds(){
+		setInterval(function(){
+			if ((player.getCurrentTime() < countseconds -3 || player.getCurrentTime() > countseconds +3)){
+				console.log("update time");
+				// player.seekTo(countseconds);
+				playerState = player.getPlayerState();
+				if (playerState == YT.PlayerState.PAUSED){
+					console.log("unpaused");
+					setPlayerState(YT.PlayerState.PLAYING,countseconds, "large");
+				} else if (playerState == YT.PlayerState.PLAYING){
+					console.log("was playing");
+					player.seekTo(countseconds);
+				}
+				// socket.emit('set player state', YT.PlayerState.PLAYING, countseconds);
+			}
+		}, 1000 * 3);
+		setInterval(function(){
+			countseconds++
+			console.log('countseconds: ', countseconds);
+		}, 1000);
 	}
 	function setPlayerState(state,time) {
 		if (state == YT.PlayerState.PLAYING) {
@@ -258,6 +287,9 @@ $(document).ready(function() {
 		socket.on('load video', function(id, time){
 			// console.log("id: " + id + " time: " + time);
 			player.loadVideoById(id, time);
+			if(disableControl = "true"){
+				countseconds = time;
+			}
 			updateCurrent(id);
 			return false;
 		});
@@ -294,6 +326,7 @@ $(document).ready(function() {
 			console.log("ran");
 			if (player != undefined){
 				player.seekTo(time);
+				countseconds = time;
 			}
 		}
 		function renderQueue(queue){
@@ -306,10 +339,12 @@ $(document).ready(function() {
 					});
 		};
 		function setChannel(channel) {
+			console.log("channel: ", channel);
 			$('#title').text('Channel: '+channel.name);
 			id = channel.current_video
 			socket.emit('user connected', id);
 			player.loadVideoById(id);
+			disableControl = channel.controls;
 		};
 function getQueue(){
 		$.ajax({
@@ -386,6 +421,9 @@ function getQueue(){
 				console.log('error', error);
 			}
 		});
+	}
+	function resetCounter(){
+		countseconds = 0;
 	}
 
 });

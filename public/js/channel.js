@@ -1,5 +1,4 @@
 $(document).ready(function() {
-	// console.log("channel.js is running");
 
 	var socket = io();
 	var roomId = window.location.pathname.split('/')[2];
@@ -28,17 +27,13 @@ $(document).ready(function() {
 	window.onYouTubeIframeAPIReady = function() {
 		if (matches) {
 			uniq = matches[1];    // "whatever"
-			console.log('uniq', uniq);
 			$.ajax({
 				url:'/channel/'+ uniq,
 				contentType: 'application/json',
 				dataType: 'json',
 				success: function(result) {
 					disableControl = result.controls;
-					console.log("result", result.controls);
-					console.log("disbaleControl: ", disableControl);
 					if (disableControl == "true"){
-						console.log("disabled player");
 						player = new YT.Player('player', {
 							height: '390',
 							width: '640',
@@ -49,7 +44,6 @@ $(document).ready(function() {
 							}
 						});
 					} else {
-						console.log("enabled player");
 						player = new YT.Player('player', {
 							height: '390',
 							width: '640',
@@ -67,7 +61,6 @@ $(document).ready(function() {
 	function onPlayerReady(event) {
 		if (matches) {
 			uniq = matches[1];    // "whatever"
-			console.log('uniq', uniq);
 			// socket.emit('addUser', {
 			// 	user: 'guest',
 			// 	channel_id: uniq
@@ -82,7 +75,6 @@ $(document).ready(function() {
 			});
 			getQueue();
 			// if(playlist.length === 0){
-			// 	console.log("no videos...");
 			// 	toggleLoad();
 			// }
 			// setInterval(getQueue(), 5000);
@@ -95,20 +87,13 @@ $(document).ready(function() {
 	//    The function indicates that when playing a video (state=1),
 	//    the player should play for six seconds and then stop.
 	function onStateChange(event) {
-		console.log("event.data", event.data);
 		if (event.data === 0){
-			console.log("video is stopped", playlist);
 			if(playlist.length >= 1){
-				console.log("playlist has a video");
 				var current = player.getVideoData()['video_id'];
-				console.log("current: ", current);
-				console.log("disableControl", disableControl);
 				if (disableControl == "false"){
-					console.log("next video in queue...");
 					socket.emit('load video', playlist[0].videoId);
 					removeQueue();
 				} if (disableControl == "true"){
-					console.log("controls are disabled...")
 					socket.emit('check video', current, socketId);
 					// removeQueue();
 				}
@@ -119,35 +104,26 @@ $(document).ready(function() {
 		var playerState = event.data;
 		var playerTime = player.getCurrentTime();
 		if(disableControl == "false"){
-			console.log("controls enabled...");
 			if (playerState == YT.PlayerState.PLAYING) {
 				socket.emit('set player state', playerState, playerTime);
-				// console.log("Player set to playing");
-				//console.log(player.getCurrentTime())vv
 			} else if (playerState == YT.PlayerState.PAUSED) {
-				// console.log("Player set to paused");
 				socket.emit('set player state', playerState, playerTime);
 			}
 		} else if (disableControl == "true"){
-			console.log("controls disabled...");
 		}
 		/*0
 		if (player.getPlayerState() === 1) {
-			console.log(player.getCurrentTime())
 		}
 		*/
 	}
 	function countingTheSeconds(){
 		cts = setInterval(function(){
 			if ((player.getCurrentTime() < countseconds -3 || player.getCurrentTime() > countseconds +3)){
-				console.log("update time");
 				// player.seekTo(countseconds);
 				playerState = player.getPlayerState();
 				if (playerState == YT.PlayerState.PAUSED){
-					console.log("unpaused");
 					setPlayerState(YT.PlayerState.PLAYING,countseconds, "large");
 				} else if (playerState == YT.PlayerState.PLAYING){
-					console.log("was playing");
 					player.seekTo(countseconds);
 				}
 				// socket.emit('set player state', YT.PlayerState.PLAYING, countseconds);
@@ -155,23 +131,16 @@ $(document).ready(function() {
 		}, 1000 * 3);
 		setInterval(function(){
 			countseconds++
-			console.log('countseconds: ', countseconds);
 		}, 1000);
 	}
 	function setPlayerState(state,time) {
 		if (state == YT.PlayerState.PLAYING) {
-			// console.log('state', state);
-			// console.log('time', time);
-			// console.log("player time: ", player.getCurrentTime());
 			if (player.getCurrentTime().toPrecision(2) != time.toPrecision(2) && player.getPlayerState() != state) {
 				player.seekTo(time);
 			}
 			player.playVideo();
-			// console.log("Set Player to playing at: "+time);
-			//console.log(player.getCurrentTime())
 		} else if (state == YT.PlayerState.PAUSED) {
 			player.pauseVideo()
-			// console.log("Set Player to paused");
 		}
 
 	}
@@ -185,7 +154,6 @@ $(document).ready(function() {
 	});
 	//chat
 		$('#chatForm').submit(function(e){
-			// console.log("submit pressed");
 			e.preventDefault();
 			if ($('#m').val()){
 					socket.emit('chat message', $('#n').val() + ': ', $('#m').val());
@@ -194,27 +162,26 @@ $(document).ready(function() {
 		});
 		var time = 0;
 		$('.skip').click(function(){
-			// console.log("playlist:", playlist);
-			time = player.getDuration();
-			console.log("duration", time);
-			socket.emit('vote skip', socketId, time);
-			$('.skip').addClass('hidden');
-			timer = setTimeout(function(){
-				socket.emit('skip expired');
-			}, 1000 * 30);
-			// socket.emit('skip', time);
+			if(playlist.length >1){
+				time = player.getDuration();
+				socket.emit('vote skip', socketId, time);
+				$('.skip').addClass('hidden');
+				timer = setTimeout(function(){
+					socket.emit('skip expired');
+				}, 1000 * 30);
+				// socket.emit('skip', time);
+			} else{
+				$('#messages').append($('<li style="color: red;">').text("no videos queued"));
+				$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
+			}
 		});
 		//add video to queue
 		$('#queueButton').click(function(e){
 			e.preventDefault();
 			var vidUrl = $('#queueUrl').val();
-			console.log("button is pressed");
-			console.log(vidUrl);
 			var regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
 			var match = vidUrl.match(regExp);
-			console.log(match);
 			if (match && match[2].length == 11) {
-				console.log("ran");
 				var vidId = match[2];
 				$.ajax({
 					url:'/channel/'+uniq,
@@ -222,10 +189,8 @@ $(document).ready(function() {
 					dataType: 'text',
 					data: {videoId: match[2]},
 					success: function(result){
-						console.log('video added to queue', result);
 					},
 					error: function(error){
-						console.log('error', error);
 					}
 				}).done(function(){
 					getQueue();
@@ -260,7 +225,6 @@ $(document).ready(function() {
 		});
 
 		socket.on('new user', function(socket){
-			// console.log('new user session id: ', socket);
 			socketId = socket;
 		});
 		socket.on('hide load', function(){
@@ -274,8 +238,6 @@ $(document).ready(function() {
 		socket.on('update name list', function(clients){
 			nameList = clients;
 			$(".userList").empty();
-			console.log('nameList: ', nameList);
-			// console.log('latest member: ', nameList[nameList.length-1]);
 			// $'(.name').remove();
 			for (name in nameList){
 				if (nameList[name].roomId === roomId){
@@ -287,8 +249,6 @@ $(document).ready(function() {
 			if (player.getCurrentTime() != undefined){
 				var playerTime = player.getCurrentTime();
 				var userJoined =clients[clients.length-1].sessionId;
-				// console.log("playerTime: ", socketId + ": "+ playerTime);
-				// console.log('user joined: ', userJoined);
 				socket.emit('send video data', userJoined, id, playerTime)
 			}
 		});
@@ -297,11 +257,9 @@ $(document).ready(function() {
 		});
 		socket.on('remove', function(){
 			playlist.shift();
-			console.log("shift...");
 			renderQueue();
 		});
 		socket.on('load video', function(id, time){
-			// console.log("id: " + id + " time: " + time);
 			player.loadVideoById(id, time);
 			if(disableControl == "true"){
 				countseconds = time;
@@ -310,7 +268,6 @@ $(document).ready(function() {
 			return false;
 		});
 		socket.on('vote skip', function(){
-			console.log("skip vote...");
 			// if (disableControl == "false"){
 				// socket.emit('skip', time);
 			// } else {
@@ -318,7 +275,6 @@ $(document).ready(function() {
 			// }
 		});
 		socket.on('skip message', function(msg){
-			console.log("skip message...");
 			$('#messages').append($('<li style="color: red;">').text(msg));
 			$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
 		});
@@ -328,11 +284,9 @@ $(document).ready(function() {
 			}
 		});
 		socket.on('skip', function(time){
-			console.log("ran");
 			// if (disableControl == "true"){
 			// 	// duration = player.getDuration();
 			// 	// seek(duration);
-			// 	// console.log("countseconds: set to zero")
 			// 	// clearInterval(cts);
 			// 	// countseconds = 0;
 			// 	// countingTheSeconds();
@@ -347,34 +301,27 @@ $(document).ready(function() {
 		});
 		socket.on('queue video', function(queue){
 			renderQueue(queue);
-			console.log("queue", queue);
 			// getQueue();
 		});
 		socket.on('check video', function(vidid, uid){
-			console.log("checking...");
 			var myvid = player.getVideoData()['video_id'];
 			if (vidid == myvid){
-				console.log("match");
 				socket.emit('video compare', "match", uid);
 			} else {
-				console.log("no match");
 				socket.emit('video compare', vidid, uid);
 			}
 		});
 		socket.on('video compare', function(vidid){
 			var myvid = player.getVideoData()['video_id'];
 			if (vidid == "match"){
-				console.log("next video...");
 				socket.emit('load video', playlist[0].videoId);
 				removeQueue();
 			} else {
-				console.log("hey its the same video...", vidid);
 				setPlayerState(YT.PlayerState.PLAYING,countseconds, "large");
 				// seekTo(countseconds);
 			}
 		});
 		function seek(time){
-			console.log("ran");
 			if (player != undefined){
 				player.seekTo(time);
 				countseconds = time;
@@ -383,21 +330,18 @@ $(document).ready(function() {
 		function renderQueue(queue){
 			$('.queueRender').remove();
 			toggleLoad();
-			console.log("queue: ", queue);
 					queue.forEach(function(el){
 						$('.queue').append($('<li class="queueRender">').text(el.title));
 						$('.queue').append('<img class="queueRender" src='+el.thumbnail+'>');
 					});
 		};
 		function setChannel(channel) {
-			console.log("channel: ", channel);
 			$('#title').text('Channel: '+channel.name);
 			id = channel.current_video
 			socket.emit('user connected', id);
 			player.loadVideoById(id);
 			// disableControl = channel.controls;
 			if(disableControl == "true"){
-				console.log("run countingTheSeconds");
 				countingTheSeconds();
 			}
 		};
@@ -407,19 +351,13 @@ function getQueue(){
 			type: 'GET',
 			dataType:'json',
 			success: function(result){
-				console.log("got channel: ", result);
-				console.log("got queue: ", result.queue);
 				var state = player.getPlayerState();
-				console.log("playlist: ", playlist);
-				console.log("player state: ", state);
 				if(playlist.length === 0 && state != 0){
-					console.log("no videos...");
 					toggleLoad();
 				}
 				var count = 1;
 				if (result.queue != undefined){
 					result.queue.forEach(function(e){
-						console.log("e",e);
 						var vidId = e.videoId;
 						var url = 'https://youtube.com/watch?v='+vidId;
 						$.getJSON('https://noembed.com/embed',
@@ -430,14 +368,11 @@ function getQueue(){
 							var thumbnail = "https://i.ytimg.com/vi/"+match[2]+"/default.jpg";
 							e["title"] = title;
 							e["thumbnail"] = thumbnail;
-							console.log("e2: ", e);
 						}).done(function(){
 							if (count === result.queue.length){
-								console.log("queue: ", result.queue);
 								socket.emit('queue video', result.queue);
 								renderQueue(result.queue);
 								playlist = result.queue;
-								console.log("playlist: ", playlist)
 							}
 							count++
 						});
@@ -445,19 +380,14 @@ function getQueue(){
 				}
 			},
 			error: function(error){
-				console.log("error: ", error);
 			}
 		});
 	}
 	function toggleLoad(){
-		console.log("toggleLoad");
-		console.log("queue: ", playlist);
 		if(!$('.loadForm').hasClass('visible') && playlist.length == 0){
-			console.log("changing to visible...");
 			$('.loadForm').removeClass("hidden").addClass("visible");
 			$('.queueForm').removeClass("visible").addClass("hidden");
 		}else if ( $('.loadForm').hasClass('visible')){
-			console.log("hiding...");
 			$('.loadForm').removeClass("visible").addClass("hidden");
 			$('.queueForm').removeClass("hidden").addClass("visible");
 		}
@@ -470,10 +400,8 @@ function getQueue(){
 			data: {current_video: id},
 			success: function(result){
 				getQueue();
-				console.log('updated current video', result);
 			},
 			error: function(error){
-				console.log('error', error);
 			}
 		});
 	}
@@ -481,23 +409,17 @@ function getQueue(){
 		countseconds = 0;
 	}
 	function removeQueue(){
-		console.log("removing first item in queue");
-		console.log("data: ", playlist[0]);
 		$.ajax({
 			method: 'PUT',
 			url:'/channel/'+uniq+'/queue',
 			dataType: 'text',
 			data: {videoId: playlist[0].videoId},
 			success: function(){
-				console.log("removed");
 				playlist.shift();
 				socket.emit('remove');
-				console.log("playlist: ", playlist);
 				renderQueue(playlist);
 				getQueue();
 			}, error: function(error){
-				console.log("error", error);
-				console.log("playlist: ", playlist);
 			}
 		});
 	}

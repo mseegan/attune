@@ -14,7 +14,6 @@ socket.on('update', function(){
 });
 
 function updateTable() {
-	// console.log("updating...");
 	$.ajax({
 		url: "/channel",
 		contentType: 'application/json',
@@ -57,13 +56,10 @@ function addRow(tableEl, row) {
 // })
 	$('.create').click(function(e){
 		e.preventDefault();
-		// console.log("clicked!");
 		createChannel();
 	});
 	function createChannel() {
-		console.log("check value", $('#checkBox').is(":checked"));
 		var check = $('#checkBox').is(":checked").toString();
-		console.log("checked: ", check);
 		var newChannel = $('#channelName').val().replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		var data = {
 			name: newChannel,
@@ -72,7 +68,6 @@ function addRow(tableEl, row) {
 		};
 		$('#channelName').val('');
 		var data = JSON.stringify(data);
-		console.log("data:", data);
 		$.ajax({
 			url: "/channel",
 			type: "POST",
@@ -80,7 +75,6 @@ function addRow(tableEl, row) {
 			dataType: 'json',
 			data: data,
 			success: function() {
-				// console.log("updating...");
 				updateTable();
 			},
 		});

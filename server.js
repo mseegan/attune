@@ -26,7 +26,6 @@ var ONEDAY = 86400000,
 //mongoose.connect('mongodb://localhost/mydb');
 
 // middleware and environment varibles
-app.set('port', process.env.PORT || 5000);
 app.set('views', __dirname + '/views');
 var exphbs = require('express-handlebars');
 app.engine('.hbs', exphbs({extname: '.hbs'}));
@@ -35,33 +34,16 @@ app.set('view engine', '.hbs');
 //////////////////////////////
 //set up express application//
 //////////////////////////////
-//app.use(express.favicon());
-//app.use(express.logger('dev'));
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-//////////////////////////////
-//required for passport///////
-//////////////////////////////
-app.use(session({ secret: 'iloveanime'}));
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash());
-
-
-//app.use(express.methodOverride());
-//app.use(express.cookieParser('your secret here'));
-//app.use(express.session());
-//app.use(app.router);
 app.use('/public', express.static(__dirname + '/public', { maxAge: ONEDAY }));
 
-server.listen(app.get('port'), function(){
+server.listen(process.env.PORT || 5000, function(){
 
 });
-
-
 // dynamically include routes (Controller)
 fs.readdirSync('./controllers').forEach(function (file) {
   if(file.substr(-3) == '.js') {
@@ -77,7 +59,6 @@ fs.readdirSync('./controllers').forEach(function (file) {
 			controller_endpoint = '/'+controller_name;
 			app.use(controller_endpoint, router);
 	  }
-	 
   }
 });
 //Sockets
@@ -86,17 +67,12 @@ var rooms = [];
 var timers = [];
 io.on('connection', function(socket){
 	var roomId;
-
   socket.on('create', function(room){
     roomId = room;
     socket.join(room);
-  
   });
   socket.on('user connected', function(id){
-  
     clients.push({ 'name': 'Anonymous', 'sessionId': socket.id, 'roomId': roomId});
-  
-  
     socket.emit('new user', socket.id);
     io.to(roomId).emit('update name list', clients);
     io.to(roomId).emit('new player', clients, id);
@@ -105,73 +81,44 @@ io.on('connection', function(socket){
       socket.broadcast.to(user).emit('load video', videoId, playerTime);
   });
 	socket.on('disconnect', function(){
-	
     for (var q=0; q < clients.length; q++){
       if(clients[q].sessionId === this.id){
-      
         clients.splice(q, 1);
       }
     }
-  
     io.to(roomId).emit('update name list', clients);
     var test = io.sockets.adapter.rooms;
-  
-  
     var keys = Object.keys(test);
-  
-  
     if (clients.length === 0){
-    
       clearRoom();
     } else {
       var usersConnected = 0;
       for (j=0; j < clients.length; j++){
-        // for(i=0; i < keys.length; i++){
-        //   if (keys[i] != clients[j].roomId){
             if (clients[j].roomId != roomId){
-            
-            
             } else {
-            
               usersConnected++
             }
-        //   }
-        // }
       }
       shouldDelete(usersConnected);
       function shouldDelete(num){
-      
         if(num === 0){
-        
             clearRoom();
-        } else{
-        
         }
       }
       var timeout;
-    
     }
     function clearRoom(){
       if (roomId != "lobby" && roomId != undefined){
-    
       var uniq = roomId;
-    
-    
       rooms.push(roomId);
       timers.push(setTimeout(function(){
         db.Channel.findOne({uniq:uniq}, function(err, channel){
-        
-        
           if (channel != null){
             channel.remove(function(err, result){
-            
               else{
-              
                 socket.to('lobby').emit('update');
                 for(i=0; i<rooms.length; i++){
-                
                   if(rooms[i] === uniq){
-                  
                     timers.splice(i, 1);
                     rooms.splice(i, 1);
                   }
@@ -183,8 +130,6 @@ io.on('connection', function(socket){
       }
       , 1000 * 10));
     }
-  
-  
     }
 	});
   socket.on('name change', function(socketId, newName){
@@ -193,11 +138,6 @@ io.on('connection', function(socket){
         clients[i].name = newName;
       }
     }
-    // for (client in clients) {
-    //   if (socketId == clients[client].sessionId){
-    //     clients[client].name = newName;
-    //   }
-    // }
     io.to(roomId).emit('update name list', clients);
   });
   socket.on('skip expired', function(){
@@ -207,16 +147,12 @@ io.on('connection', function(socket){
     io.to(roomId).emit('skip message', '[SERVER]: Skip vote Timed out.')
   });
   socket.on('vote skip', function(uid, time){
-  
     var skipCount = 0;
     var total = 0;
     for (i=0; i<clients.length; i++){
-    
-    
       if(clients[i].sessionId == uid){
         clients[i].skip = true;
         socket.emit('vote skip', function(){
-        
         });
         for (i=0; i< clients.length; i++){
           if(clients[i].roomId == roomId){
@@ -227,8 +163,6 @@ io.on('connection', function(socket){
           }
         }
         rounded = Math.ceil(total/2);
-      
-      
         if (skipCount >= rounded){
           io.to(roomId).emit('skip message', '[SERVER]: Skip vote passes. Skipping...');
           io.to(roomId).emit('cancel timer');
@@ -247,21 +181,16 @@ io.on('connection', function(socket){
         clients[i].skip = false;
       }
     }
-  
   }
   socket.on('check video', function(vidid, id){
     counter = 0;
     for (i=0; i<clients.length; i++){
-    
       if (clients[i].roomId == roomId){
         counter++
-      
       }
         if (counter > 1){
-        
           socket.broadcast.to(roomId).emit('check video',vidid, id);
         } else {
-      
         socket.emit('video compare', 'match');
       }
     }
@@ -274,19 +203,18 @@ io.on('connection', function(socket){
     }
   });
 	socket.on('set player state', function(state, time) {
-	
+
 		io.to(roomId).emit('set player state', state, time);
 	});
 	socket.on('chat message', function(username, msg){
-	
+
 		io.to(roomId).emit('chat message', username + msg);
 	});
   socket.on('load video', function(id) {
     currentVideoId = id;
-  
     io.to(roomId).emit('load video', id, 0);
     io.to(roomId).emit('unhide skip');
-  
+
   });
   socket.on('hide load', function(){
     socket.broadcast.to(roomId).emit('hide load');
@@ -295,43 +223,24 @@ io.on('connection', function(socket){
     io.to(roomId).emit('queue video', queue);
   });
   socket.on('skip', function(time){
-  
+
     io.to(roomId).emit('skip', time);
   });
   socket.on('remove', function(){
     socket.broadcast.to(roomId).emit('remove');
   });
   socket.on('stop countdown', function(rid){
-  
-  
-    // if(rid === roomId){
-    
       for (i=0; i < rooms.length; i ++){
         if (rid == rooms[i]){
-        
           stopCountdown(i);
         }
       }
-    // }
-    // if (roomId === uniq){
-    //   stopCountdown(timeoutID);
-    // }
     function stopCountdown(timeoutID){
-    
       clearTimeout(timers[timeoutID]);
       timers.splice(timeoutID, 1);
       rooms.splice(timeoutID, 1);
-    
-    
+
+
     }
   });
 });
-
-
-// for (client in clients) {
-//   if (clients[client].sessionId === this.id){
-//     clients.splice(client, 1);
-//   }
-//   if(clients.length === 0){
-//   }
-// }

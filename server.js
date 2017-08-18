@@ -167,7 +167,7 @@ io.on('connection', function(socket){
               if(err){ console.log("[log] error - ", err); }
               else{
                 console.log("sucessfully removed the channel!");
-                socket.to('lobby').emit('update');
+                io.to('lobby').emit('update');
                 for(i=0; i<rooms.length; i++){
                   // console.log('iteration');
                   if(rooms[i] === uniq){

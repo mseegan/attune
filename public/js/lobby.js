@@ -75,17 +75,19 @@ function addRow(tableEl, row) {
 		$('#channelName').val('');
 		var data = JSON.stringify(data);
 		console.log("data:", data);
-		$.ajax({
-			url: "/channel",
-			type: "POST",
-			contentType: 'application/json',
-			dataType: 'json',
-			data: data,
-			success: function() {
-				// console.log("updating...");
-				updateTable();
-			},
-		});
+		if (newChannel.length >=1 ) {
+			$.ajax({
+				url: "/channel",
+				type: "POST",
+				contentType: 'application/json',
+				dataType: 'json',
+				data: data,
+				success: function() {
+					// console.log("updating...");
+					updateTable();
+				},
+			});
+		}
 		// createChannelFormSetVisibilty('none');
 	}
 });

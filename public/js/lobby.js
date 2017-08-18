@@ -65,8 +65,10 @@ function addRow(tableEl, row) {
 		var check = $('#checkBox').is(":checked").toString();
 		console.log("checked: ", check);
 		var newChannel = $('#channelName').val().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+		var password = $('#password').val();
 		var data = {
 			name: newChannel,
+			password: password,
 			owner: 'guest',
 			controls: check
 		};

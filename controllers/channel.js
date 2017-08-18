@@ -24,20 +24,40 @@ module.exports.controller = function(router, app) {
 		})
 		.post(function(req, res){
 			var uniq = intformat(generator.next(), 'dec');
-			db.Channel.create({
-				name : req.body.name,
-				owner : 'guest',
-        current_video: '',
-				date : Date.now(),
-        queue: [],
-        controls: req.body.controls,
-				uniq : uniq,
-			}, function(err, channel) {
-				if (err) {
-				} else {
-					res.json(channel);
-				}
-			});
+      if (req.body.password == '' || req.body.password == null){
+        console.log("no password");
+        db.Channel.create({
+          name : req.body.name,
+          owner : 'guest',
+          current_video: '',
+          date : Date.now(),
+          queue: [],
+          controls: req.body.controls,
+          uniq : uniq,
+        }, function(err, channel) {
+          if (err) {
+          } else {
+            res.json(channel);
+          }
+        });
+      } else {
+        console.log("password detected", req.body.password);
+        db.Channel.create({
+          name : req.body.name,
+          owner : 'guest',
+          password: req.body.password,
+          current_video: '',
+          date : Date.now(),
+          queue: [],
+          controls: req.body.controls,
+          uniq : uniq,
+        }, function(err, channel) {
+          if (err) {
+          } else {
+            res.json(channel);
+          }
+        });
+      }
 		});
 
 	router.route('/:uniq')

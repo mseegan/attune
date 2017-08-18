@@ -205,7 +205,7 @@ $(document).ready(function() {
 				}, 1000 * 30);
 				// socket.emit('skip', time);
 			} else{
-				$('#messages').append($('<li style="color: red;">').text("no videos queued"));
+				$('#messages').append($('<li style="color: red;">').text("[SERVER]: videos queued"));
 				$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
 			}
 		});

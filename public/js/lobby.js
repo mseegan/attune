@@ -61,9 +61,9 @@ function addRow(tableEl, row) {
 		createChannel();
 	});
 	function createChannel() {
-		console.log("check value", $('#checkBox').is(":checked"));
+		// console.log("check value", $('#checkBox').is(":checked"));
 		var check = $('#checkBox').is(":checked").toString();
-		console.log("checked: ", check);
+		// console.log("checked: ", check);
 		var newChannel = $('#channelName').val().replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		var password = $('#password').val();
 		var data = {
@@ -74,8 +74,8 @@ function addRow(tableEl, row) {
 		};
 		$('#channelName').val('');
 		var data = JSON.stringify(data);
-		console.log("data:", data);
-		if ($('#channelName').val().length >1 ) {
+		// console.log("data:", data);
+		if (newChannel.length >1 ) {
 			$.ajax({
 				url: "/channel",
 				type: "POST",

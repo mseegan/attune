@@ -227,13 +227,11 @@ $(document).ready(function() {
 					dataType: 'text',
 					data: {videoId: match[2]},
 					success: function(result){
-
+						getQueue();
 					},
 					error: function(error){
 
 					}
-				}).done(function(){
-					getQueue();
 				});
 			}else {
 				$('#messages').append($('<li style="color: red;">').text("invalid url"));
@@ -302,8 +300,8 @@ $(document).ready(function() {
 		});
 		socket.on('remove', function(){
 			playlist.shift();
-
-			renderQueue();
+			console.log("playlist: ", playlist);
+			renderQueue(playlist);
 		});
 		socket.on('load video', function(id, time){
 
@@ -312,6 +310,7 @@ $(document).ready(function() {
 				countseconds = time;
 			}
 			updateCurrent(id);
+
 			return false;
 		});
 		socket.on('vote skip', function(){
@@ -352,7 +351,7 @@ $(document).ready(function() {
 		});
 		socket.on('queue video', function(queue){
 			renderQueue(queue);
-
+			playlist = queue;
 			// getQueue();
 		});
 		socket.on('check video', function(vidid, uid){
@@ -366,12 +365,17 @@ $(document).ready(function() {
 				socket.emit('video compare', vidid, uid);
 			}
 		});
+		socket.on('removeQueue', function(){
+			removeQueue();
+			// renderQueue(playlist);
+		});
 		socket.on('video compare', function(vidid){
 			var myvid = player.getVideoData()['video_id'];
 			if (vidid == "match"){
 
 				socket.emit('load video', playlist[0].videoId);
-				removeQueue();
+				socket.emit('remove queue');
+				// removeQueue();
 			} else {
 
 				setPlayerState(YT.PlayerState.PLAYING,countseconds, "large");
@@ -386,6 +390,7 @@ $(document).ready(function() {
 			}
 		}
 		function renderQueue(queue){
+			console.log("queue: ", queue);
 			$('.queueRender').remove();
 			toggleLoad();
 

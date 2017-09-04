@@ -249,6 +249,9 @@ io.on('connection', function(socket){
     }
     console.log("clients after reset: ", clients);
   }
+  socket.on('remove queue', function(){
+    io.to(roomId).emit('remove queue');
+  });
   socket.on('check video', function(vidid, id){
     counter = 0;
     for (i=0; i<clients.length; i++){

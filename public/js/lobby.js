@@ -75,7 +75,7 @@ function addRow(tableEl, row) {
 		$('#channelName').val('');
 		var data = JSON.stringify(data);
 		console.log("data:", data);
-		if (newChannel.length >=1 ) {
+		if ($('#channelName').val().length >1 ) {
 			$.ajax({
 				url: "/channel",
 				type: "POST",

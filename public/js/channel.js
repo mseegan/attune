@@ -25,6 +25,7 @@ $(document).ready(function() {
 	var disableControl = "false";
 	var countseconds;
 	var cts;
+	var myname = "Anonymous";
 	window.onYouTubeIframeAPIReady = function() {
 		if (matches) {
 			uniq = matches[1];    // "whatever"
@@ -81,6 +82,11 @@ $(document).ready(function() {
 				}
 			});
 			getQueue();
+			playerState = player.getPlayerState();
+			console.log("playerState", playerState);
+			if (playerState == 5 && playlist.length == 0){
+				toggleLoad();
+			}
 			// if(playlist.length === 0){
 
 			// 	toggleLoad();
@@ -95,7 +101,6 @@ $(document).ready(function() {
 	//    The function indicates that when playing a video (state=1),
 	//    the player should play for six seconds and then stop.
 	function onStateChange(event) {
-
 		if (event.data === 0){
 
 			if(playlist.length >= 1){
@@ -113,7 +118,7 @@ $(document).ready(function() {
 					// removeQueue();
 				}
 			} else {
-				toggleLoad();
+				// toggleLoad();
 			}
 		}
 		var playerState = event.data;
@@ -181,6 +186,7 @@ $(document).ready(function() {
 			socket.emit('name change', socketId, $('#n').val());
 			$('#n').blur();
 			$('#m').focus();
+			myname = $('#n').val();
 		}
 	});
 	//chat
@@ -188,7 +194,7 @@ $(document).ready(function() {
 
 			e.preventDefault();
 			if ($('#m').val()){
-					socket.emit('chat message', $('#n').val() + ': ', $('#m').val());
+					socket.emit('chat message', myname + ': ', $('#m').val());
 					$('#m').val('');
 			}
 		});
@@ -253,7 +259,7 @@ $(document).ready(function() {
 				socket.emit('load video', vidId);
 				socket.emit('hide load');
 				updateCurrent(match[2]);
-				toggleLoad();
+				// toggleLoad();
 			}else {
 				$('#messages').append($('<li style="color: red;">').text("invalid url"));
 				$('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
@@ -392,7 +398,7 @@ $(document).ready(function() {
 		function renderQueue(queue){
 			console.log("queue: ", queue);
 			$('.queueRender').remove();
-			toggleLoad();
+			// toggleLoad();
 
 					queue.forEach(function(el){
 						$('.queue').append($('<li class="queueRender">').text(el.title));
@@ -424,7 +430,7 @@ function getQueue(){
 
 				if(playlist.length === 0 && state != 0){
 
-					toggleLoad();
+					// toggleLoad();
 				}
 				var count = 1;
 				if (result.queue != undefined){
@@ -460,14 +466,14 @@ function getQueue(){
 		});
 	}
 	function toggleLoad(){
-
+		console.log("toggle");
 
 		if(!$('.loadForm').hasClass('visible') && playlist.length == 0){
-
+			console.log("queue on");
 			$('.loadForm').removeClass("hidden").addClass("visible");
 			$('.queueForm').removeClass("visible").addClass("hidden");
 		}else if ( $('.loadForm').hasClass('visible')){
-
+			console.log("load on");
 			$('.loadForm').removeClass("visible").addClass("hidden");
 			$('.queueForm').removeClass("hidden").addClass("visible");
 		}

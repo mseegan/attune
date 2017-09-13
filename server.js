@@ -292,7 +292,7 @@ io.on('connection', function(socket){
     // console.log('current id', currentVideoId);
   });
   socket.on('hide load', function(){
-    socket.broadcast.to(roomId).emit('hide load');
+    io.to(roomId).emit('hide load');
   });
   socket.on('queue video', function(queue){
     io.to(roomId).emit('queue video', queue);

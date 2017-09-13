@@ -66,6 +66,7 @@ $(document).ready(function() {
 	}
 	// 4. The API will call this function when the video player is ready.
 	function onPlayerReady(event) {
+		console.log("event: ", event);
 		if (matches) {
 			uniq = matches[1];    // "whatever"
 
@@ -79,13 +80,17 @@ $(document).ready(function() {
 				dataType: 'json',
 				success: function(result) {
 					setChannel(result);
+					console.log("result: ", result);
+					firstToggle(result.current_video);
 				}
 			});
 			getQueue();
 			playerState = player.getPlayerState();
 			console.log("playerState", playerState);
-			if (playerState == 5 && playlist.length == 0){
-				toggleLoad();
+			function firstToggle(video){
+				if (playerState == 5 && video != ""){
+					toggleLoad();
+				}
 			}
 			// if(playlist.length === 0){
 
@@ -118,7 +123,7 @@ $(document).ready(function() {
 					// removeQueue();
 				}
 			} else {
-				// toggleLoad();
+				toggleLoad();
 			}
 		}
 		var playerState = event.data;
@@ -469,11 +474,11 @@ function getQueue(){
 		console.log("toggle");
 
 		if(!$('.loadForm').hasClass('visible') && playlist.length == 0){
-			console.log("queue on");
+			console.log("load on");
 			$('.loadForm').removeClass("hidden").addClass("visible");
 			$('.queueForm').removeClass("visible").addClass("hidden");
 		}else if ( $('.loadForm').hasClass('visible')){
-			console.log("load on");
+			console.log("queue on");
 			$('.loadForm').removeClass("visible").addClass("hidden");
 			$('.queueForm').removeClass("hidden").addClass("visible");
 		}
